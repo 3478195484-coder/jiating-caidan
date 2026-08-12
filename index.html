@@ -187,13 +187,15 @@
     box-shadow:0 1px 3px rgba(0,0,0,.05);
   }
   .slot img{width:100%; height:100%; object-fit:cover; position:absolute; inset:0; opacity:0; transition:opacity .15s;}
-  .slot img.show{opacity:1; cursor:pointer;}
+  .slot img.show{opacity:1;}
   .slot .name{
     position:relative; z-index:2; font-size:28px; letter-spacing:2px;
     background:rgba(255,255,255,.94); padding:6px 22px;
     border:1px solid var(--line); border-radius:8px; color:var(--text); font-weight:700;
     box-shadow:0 2px 8px rgba(0,0,0,.08);
+    cursor:pointer; transition:border-color .15s, color .15s;
   }
+  .slot .name:hover{border-color:var(--accent); color:var(--accent-d);}
   .slot .hint{position:relative; z-index:2; font-size:14px; color:var(--muted);}
   .slot .hint.hidden{visibility:hidden;}
   .roll-row{display:flex; gap:14px; justify-content:center; align-items:center; margin-top:18px; flex-wrap:wrap;}
@@ -333,6 +335,7 @@
       <h2>我的菜谱</h2>
       <span class="note">共 <b id="lib-count">0</b> 道 · 点击卡片看详情</span>
       <button class="btn primary" style="margin-left:auto;" onclick="openRecipeModal()">＋ 添加新菜</button>
+      <button class="btn blue" onclick="openRecognize()">📷 拍照识菜</button>
     </div>
 
     <div class="filters">
@@ -361,6 +364,7 @@
     <div class="sec-title">
       <h2>🎲 随机点菜</h2>
       <span class="note">选择分类，按一下，命运帮你决定今晚吃什么</span>
+      <button class="btn blue" style="margin-left:auto;" onclick="openRecognize()">📷 拍照识菜</button>
     </div>
 
     <div class="filters" id="roll-filters" style="margin-top:10px;">
@@ -379,9 +383,9 @@
 
     <div class="slot-wrap">
       <div class="slot">
-        <img id="roll-img" alt="" onclick="rollShowRecipe()">
+        <img id="roll-img" alt="">
         <div class="hint" id="roll-hint">准备好了吗？按下面的大按钮 👇</div>
-        <div class="name" id="roll-name" style="display:none;"></div>
+        <div class="name" id="roll-name" style="display:none;" onclick="rollShowRecipe()"></div>
       </div>
       <div class="roll-row">
         <div class="count-stepper">
@@ -399,6 +403,7 @@
     <div class="sec-title">
       <h2>🍱 今日菜单</h2>
       <span class="note">荤素搭配，一键生成，还能分享给家人朋友</span>
+      <button class="btn blue" style="margin-left:auto;" onclick="openRecognize()">📷 拍照识菜</button>
     </div>
 
     <div class="plan-card">
@@ -515,6 +520,45 @@
   <!-- ================= 菜谱详情弹窗 ================= -->
   <div id="detail-mask" class="mask">
     <div class="modal" id="detail-body"></div>
+  </div>
+
+  <!-- ================= 拍照识菜弹窗 ================= -->
+  <div id="rc-mask" class="mask">
+    <div class="modal" style="width:min(560px,100%);">
+      <div class="close-x" onclick="closeRecognize()">✕</div>
+      <h3 id="rc-title">📷 拍照识菜</h3>
+      <div class="field">
+        <label>上传菜品照片</label>
+        <div class="photo-row">
+          <button type="button" class="btn pink sm" onclick="rcPick()">📷 拍照</button>
+          <button type="button" class="btn blue sm" onclick="rcPickAlbum()">🖼 从相册选</button>
+        </div>
+        <input type="file" id="rc-file" accept="image/*" capture="environment" style="display:none;" onchange="rcOnPicked(event)">
+        <input type="file" id="rc-file-album" accept="image/*" style="display:none;" onchange="rcOnPicked(event)">
+      </div>
+      <div class="field">
+        <label>识别结果</label>
+        <div id="rc-status" style="font-size:14px; color:var(--muted); margin-bottom:8px;">拍照后自动识别，也可直接编辑下方信息</div>
+        <div class="photo-preview" id="rc-preview" style="display:none;"><img id="rc-preview-img" alt="预览" style="max-width:180px; max-height:180px; border:1px solid var(--line); border-radius:10px;"></div>
+        <div id="rc-conf" style="font-size:13px; color:var(--accent-d); margin:6px 0;"></div>
+      </div>
+      <div class="field"><label>菜名 *</label><input id="rc-name" placeholder="识别出或手动填写菜名"></div>
+      <div class="field-row">
+        <div class="field"><label>分类</label>
+          <select id="rc-cat"><option>荤菜</option><option>素菜</option><option>汤羹</option><option>凉菜</option><option>主食</option><option>甜品</option><option>饮品</option><option>水果</option><option>减脂餐</option><option>快餐</option></select>
+        </div>
+        <div class="field"><label>难度</label>
+          <select id="rc-diff"><option>简单</option><option>中等</option><option>困难</option></select>
+        </div>
+      </div>
+      <div class="field"><label>食材清单（逗号或顿号分隔）</label><textarea id="rc-ing" placeholder="识别出或手动填写食材"></textarea></div>
+      <div class="field"><label>热量（千卡/份）</label><input id="rc-cal" type="number" min="0" placeholder="如：350"></div>
+      <div class="field"><label>小贴士 / 做法备注</label><textarea id="rc-note" placeholder="火候、秘诀……"></textarea></div>
+      <div class="modal-foot">
+        <button class="btn" onclick="closeRecognize()">关闭</button>
+        <button class="btn primary" onclick="saveRecognized()">📥 添加进菜谱</button>
+      </div>
+    </div>
   </div>
 
   <footer>
@@ -1078,6 +1122,176 @@ function shrinkForShare(dataUrl, maxSide=140, quality=0.7){
   });
 }
 
+/* ================= 拍照识菜（本地 TensorFlow.js MobileNet） ================= */
+let rcImgData = '';     // 当前识菜弹窗里的图片 dataURL
+let rcModel = null;     // MobileNet 模型
+let rcLoading = false;
+function openRecognize(){
+  // 清空上次
+  rcImgData = '';
+  ['rc-file','rc-file-album'].forEach(id=> document.getElementById(id).value='');
+  document.getElementById('rc-preview').style.display='none';
+  document.getElementById('rc-conf').textContent='';
+  document.getElementById('rc-name').value='';
+  document.getElementById('rc-cat').value='荤菜';
+  document.getElementById('rc-diff').value='简单';
+  document.getElementById('rc-ing').value='';
+  document.getElementById('rc-cal').value='';
+  document.getElementById('rc-note').value='';
+  document.getElementById('rc-status').textContent='拍照后自动识别，也可直接编辑下方信息';
+  document.getElementById('rc-mask').classList.add('show');
+}
+function closeRecognize(){ document.getElementById('rc-mask').classList.remove('show'); }
+function rcPick(){ document.getElementById('rc-file').click(); }
+function rcPickAlbum(){ document.getElementById('rc-file-album').click(); }
+function rcOnPicked(ev){
+  const file = ev.target.files && ev.target.files[0];
+  if(!file) return;
+  if(!/^image\//.test(file.type)){ toast('请选择图片文件'); return; }
+  const reader = new FileReader();
+  reader.onload = e=>{
+    const img = new Image();
+    img.onload = ()=>{
+      // 压缩到识别合适尺寸
+      const maxSide = 640;
+      let w = img.width, h = img.height;
+      const scale = Math.min(1, maxSide/Math.max(w,h));
+      w = Math.max(1, Math.round(w*scale)); h = Math.max(1, Math.round(h*scale));
+      const c = document.createElement('canvas');
+      c.width = w; c.height = h;
+      const ctx = c.getContext('2d');
+      ctx.fillStyle = '#fff'; ctx.fillRect(0,0,w,h);
+      ctx.drawImage(img,0,0,w,h);
+      rcImgData = c.toDataURL('image/jpeg', 0.8);
+      document.getElementById('rc-preview-img').src = rcImgData;
+      document.getElementById('rc-preview').style.display='flex';
+      // 开始识别
+      runRecognition(c);
+    };
+    img.onerror = ()=>{ toast('图片读取失败，请重试'); };
+    img.src = e.target.result;
+  };
+  reader.onerror = ()=>{ toast('图片读取失败，请重试'); };
+  reader.readAsDataURL(file);
+}
+function loadRcModel(){
+  return new Promise((resolve,reject)=>{
+    if(rcModel){ resolve(rcModel); return; }
+    if(rcLoading){ const iv=setInterval(()=>{ if(rcModel){ clearInterval(iv); resolve(rcModel); } },200); return; }
+    rcLoading = true;
+    const status = document.getElementById('rc-status');
+    status.textContent = '首次使用需联网加载识别模型（约几 MB），请稍候…';
+    // 动态加载 TensorFlow.js + MobileNet
+    const loadScript = src => new Promise((res,rej)=>{
+      const s = document.createElement('script');
+      s.src = src; s.onload = res; s.onerror = rej;
+      document.head.appendChild(s);
+    });
+    (async()=>{
+      try{
+        await loadScript('https://cdn.jsdelivr.net/npm/@tensorflow/tfjs@4.20.0/dist/tf.min.js');
+        await loadScript('https://cdn.jsdelivr.net/npm/@tensorflow-models/mobilenet@2.1.1/dist/mobilenet.min.js');
+        rcModel = await window.mobilenet.load();
+        rcLoading = false;
+        resolve(rcModel);
+      }catch(err){
+        rcLoading = false;
+        status.textContent = '模型加载失败，可能离线或网络问题。可手动填写下方信息。';
+        reject(err);
+      }
+    })();
+  });
+}
+async function runRecognition(canvas){
+  const status = document.getElementById('rc-status');
+  const conf = document.getElementById('rc-conf');
+  try{
+    const model = await loadRcModel();
+    status.textContent = '识别中…';
+    const preds = await model.classify(canvas);
+    const top = preds[0];
+    if(!top || top.probability < 0.1){
+      conf.textContent = '未能可靠识别出菜品，请手动填写下方信息';
+      status.textContent = '识别完成（置信度较低），可手动编辑';
+      return;
+    }
+    // 把英文类别映射成中文菜名/食材/热量
+    const mapped = mapFood(top.className);
+    if(mapped.name){
+      document.getElementById('rc-name').value = mapped.name;
+      document.getElementById('rc-ing').value = mapped.ingredients;
+      if(mapped.calories) document.getElementById('rc-cal').value = mapped.calories;
+      document.getElementById('rc-cat').value = mapped.category || '荤菜';
+      conf.textContent = `识别为「${mapped.name}」· 置信度 ${(top.probability*100).toFixed(1)}%（可修改）`;
+    }else{
+      document.getElementById('rc-name').value = '';
+      conf.textContent = `识别为「${top.className}」· 置信度 ${(top.probability*100).toFixed(1)}%，请手动填写菜名`;
+    }
+    status.textContent = '识别完成，可编辑后添加进菜谱';
+  }catch(err){
+    status.textContent = '识别失败，可手动填写下方信息';
+    console.error(err);
+  }
+}
+// 英文食物类别 → 中文菜谱信息映射（覆盖常见食物）
+function mapFood(cls){
+  const c = cls.toLowerCase();
+  const M = [
+    [/pizza/, {name:'披萨', category:'快餐', ingredients:'饼底，番茄酱，芝士，香肠，蘑菇', calories:280}],
+    [/hamburger|burger/, {name:'汉堡', category:'快餐', ingredients:'面包，牛肉饼，生菜，芝士，番茄酱', calories:300}],
+    [/hotdog|frank/, {name:'热狗', category:'快餐', ingredients:'面包，香肠，番茄酱，芥末', calories:290}],
+    [/sandwich/, {name:'三明治', category:'快餐', ingredients:'面包，火腿，生菜，芝士，蛋黄酱', calories:250}],
+    [/fried chicken/, {name:'炸鸡', category:'快餐', ingredients:'鸡腿，鸡翅，炸鸡粉，食用油', calories:320}],
+    [/meat loaf/, {name:'肉糕', category:'荤菜', ingredients:'猪肉末，鸡蛋，面包屑，洋葱', calories:260}],
+    [/pork chop/, {name:'猪排', category:'荤菜', ingredients:'猪排，盐，黑胡椒，橄榄油', calories:280}],
+    [/steak|beef/, {name:'牛排', category:'荤菜', ingredients:'牛排，黑胡椒，盐，黄油', calories:350}],
+    [/chicken/, {name:'鸡肉', category:'荤菜', ingredients:'鸡肉，姜，葱，料酒', calories:200}],
+    [/broccoli/, {name:'西兰花', category:'素菜', ingredients:'西兰花，蒜，盐，食用油', calories:60}],
+    [/cauliflower/, {name:'菜花', category:'素菜', ingredients:'菜花，蒜，盐', calories:50}],
+    [/cabbage/, {name:'卷心菜', category:'素菜', ingredients:'卷心菜，蒜，盐，醋', calories:40}],
+    [/lettuce|salad/, {name:'蔬菜沙拉', category:'减脂餐', ingredients:'生菜，番茄，黄瓜，油醋汁', calories:90}],
+    [/mushroom/, {name:'蘑菇', category:'素菜', ingredients:'蘑菇，蒜，盐', calories:40}],
+    [/squash|pumpkin/, {name:'南瓜', category:'素菜', ingredients:'南瓜，蒜，盐', calories:60}],
+    [/cucumber/, {name:'黄瓜', category:'凉菜', ingredients:'黄瓜，蒜，醋，生抽', calories:30}],
+    [/corn/, {name:'玉米', category:'主食', ingredients:'玉米', calories:110}],
+    [/banana/, {name:'香蕉', category:'水果', ingredients:'香蕉', calories:105}],
+    [/apple/, {name:'苹果', category:'水果', ingredients:'苹果', calories:95}],
+    [/orange/, {name:'橙子', category:'水果', ingredients:'橙子', calories:62}],
+    [/lemon/, {name:'柠檬', category:'水果', ingredients:'柠檬', calories:30}],
+    [/strawberry/, {name:'草莓', category:'水果', ingredients:'草莓', calories:40}],
+    [/pineapple/, {name:'菠萝', category:'水果', ingredients:'菠萝', calories:50}],
+    [/egg|omelet/, {name:'煎蛋', category:'荤菜', ingredients:'鸡蛋2个，油，盐', calories:140}],
+    [/mashed potato/, {name:'土豆泥', category:'素菜', ingredients:'土豆，牛奶，黄油，盐', calories:150}],
+    [/ice cream/, {name:'冰淇淋', category:'甜品', ingredients:'奶油，牛奶，糖', calories:210}],
+    [/dough|bread|loaf/, {name:'面包', category:'主食', ingredients:'面粉，酵母，糖', calories:260}],
+    [/rice/, {name:'米饭', category:'主食', ingredients:'大米，清水', calories:230}],
+    [/noodle|spaghetti|pasta/, {name:'面条', category:'主食', ingredients:'面条，酱料', calories:280}],
+    [/soup/, {name:'汤', category:'汤羹', ingredients:'时蔬，水，盐', calories:80}]
+  ];
+  for(const [re, info] of M){
+    if(re.test(c)) return info;
+  }
+  return null;
+}
+function saveRecognized(){
+  const name = document.getElementById('rc-name').value.trim();
+  if(!name){ toast('请填写菜名'); return; }
+  const calVal = parseInt(document.getElementById('rc-cal').value, 10);
+  const data = {
+    name,
+    category: document.getElementById('rc-cat').value,
+    difficulty: document.getElementById('rc-diff').value,
+    ingredients: document.getElementById('rc-ing').value.trim(),
+    calories: isNaN(calVal) ? '' : calVal,
+    image: rcImgData,
+    note: document.getElementById('rc-note').value.trim()
+  };
+  recipes.unshift({id:uid(), ...data});
+  saveRecipes(); renderLib();
+  toast('已添加进菜谱 ✓');
+  closeRecognize();
+}
+
 /* ================= 菜谱 CRUD ================= */
 function openRecipeModal(id){
   editingId = id || null;
@@ -1221,7 +1435,7 @@ function finishRoll(pool){
   name.style.display='block';
   name.textContent = res.map(r=>r.name).join(' · ');
   hint.classList.remove('hidden');
-  hint.textContent = res.length>1? '命运选了这几道，点图片看食谱' : '点图片看这道菜的食谱吧';
+  hint.textContent = res.length>1? '命运选了这几道，点菜名看食谱' : '点菜名看这道菜的食谱吧';
   document.getElementById('roll-btn').textContent='再转一次！';
 }
 
@@ -1450,6 +1664,7 @@ document.querySelectorAll('#roll-filters .chip').forEach(c=> c.onclick=()=>setFi
 document.getElementById('search-input').addEventListener('input', renderLib);
 document.getElementById('recipe-mask').addEventListener('click', e=>{ if(e.target.id==='recipe-mask') closeRecipeModal(); });
 document.getElementById('detail-mask').addEventListener('click', e=>{ if(e.target.id==='detail-mask') closeDetail(); });
+document.getElementById('rc-mask').addEventListener('click', e=>{ if(e.target.id==='rc-mask') closeRecognize(); });
 
 function init(){
   loadRecipes();
