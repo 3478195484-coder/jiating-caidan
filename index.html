@@ -186,8 +186,27 @@
     position:relative; overflow:hidden;
     box-shadow:0 1px 3px rgba(0,0,0,.05);
   }
-  .slot img{width:100%; height:100%; object-fit:cover; position:absolute; inset:0; opacity:0; transition:opacity .15s;}
-  .slot img.show{opacity:1;}
+  .slot .roll-carousel{position:absolute; inset:0; width:100%; height:100%;}
+  .slot img{width:100%; height:100%; object-fit:cover; position:absolute; inset:0; opacity:0; transition:opacity .15s; left:0; top:0;}
+  .slot img.show{opacity:1; cursor:pointer;}
+  .slot .roll-nav{
+    position:absolute; top:50%; transform:translateY(-50%); z-index:5;
+    width:34px; height:34px; border-radius:50%; border:none; cursor:pointer;
+    background:rgba(255,255,255,.85); color:var(--text); font-size:20px; line-height:1;
+    box-shadow:0 2px 6px rgba(0,0,0,.2); display:none; align-items:center; justify-content:center;
+  }
+  .slot .roll-nav:hover{background:#fff;}
+  .slot .roll-prev{left:10px;}
+  .slot .roll-next{right:10px;}
+  .slot .roll-dots{
+    position:absolute; bottom:42px; left:50%; transform:translateX(-50%); z-index:5;
+    display:none; gap:6px;
+  }
+  .slot .roll-dots .dot{
+    width:8px; height:8px; border-radius:50%; background:rgba(255,255,255,.6); cursor:pointer;
+    border:1px solid rgba(0,0,0,.2);
+  }
+  .slot .roll-dots .dot.on{background:var(--accent);}
   .slot .name{
     position:relative; z-index:2; font-size:28px; letter-spacing:2px;
     background:rgba(255,255,255,.94); padding:6px 22px;
@@ -299,24 +318,6 @@
   }
   .toast.show{opacity:1; transform:translateX(-50%) translateY(0);}
 
-  /* AI 助手 */
-  #ai-fab{
-    position:fixed; right:24px; bottom:24px; width:56px; height:56px; border-radius:50%;
-    background:var(--accent); color:#fff; font-size:26px; display:flex; align-items:center; justify-content:center;
-    cursor:pointer; z-index:60; box-shadow:0 6px 16px rgba(0,0,0,.25);
-    transition:transform .15s;
-  }
-  #ai-fab:hover{transform:scale(1.1);}
-  #ai-panel{display:none;}
-  #ai-panel.show{display:flex;}
-  #ai-msgs .ai-msg{margin-bottom:10px; display:flex; flex-direction:column;}
-  #ai-msgs .ai-msg.user{align-items:flex-end;}
-  #ai-msgs .ai-msg .bubble{
-    max-width:85%; padding:9px 13px; border-radius:12px; font-size:14px; line-height:1.6; white-space:pre-wrap; word-break:break-word;
-  }
-  #ai-msgs .ai-msg.user .bubble{background:var(--accent); color:#fff; border-bottom-right-radius:3px;}
-  #ai-msgs .ai-msg.bot .bubble{background:#fff; border:1px solid var(--line); color:var(--text); border-bottom-left-radius:3px;}
-
   footer{text-align:center; margin-top:40px; color:var(--muted); font-size:13px; letter-spacing:2px;}
   @media (max-width:560px){
     header.cover .big{font-size:28px; letter-spacing:2px;}
@@ -401,7 +402,12 @@
 
     <div class="slot-wrap">
       <div class="slot">
-        <img id="roll-img" alt="">
+        <div class="roll-carousel" id="roll-carousel">
+          <img id="roll-img" alt="" onclick="rollImgClick()">
+        </div>
+        <button class="roll-nav roll-prev" id="roll-prev" onclick="rollMove(-1)">‹</button>
+        <button class="roll-nav roll-next" id="roll-next" onclick="rollMove(1)">›</button>
+        <div class="roll-dots" id="roll-dots"></div>
         <div class="hint" id="roll-hint">准备好了吗？按下面的大按钮 👇</div>
         <div class="name" id="roll-name" style="display:none;" onclick="rollShowRecipe()"></div>
       </div>
@@ -586,26 +592,6 @@
 </div>
 
 <div class="toast" id="toast"></div>
-
-<!-- ================= AI 问答助手浮窗 ================= -->
-<div id="ai-fab" onclick="aiToggle()">🤖</div>
-<div id="ai-panel" class="mask">
-  <div class="modal" style="width:min(480px,100%); height:min(600px,80vh); display:flex; flex-direction:column; padding:20px;">
-    <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:12px;">
-      <h3 style="margin:0;">🤖 AI 小厨神</h3>
-      <div>
-        <span id="ai-dot" style="display:inline-block; width:10px; height:10px; border-radius:50%; background:#ccc; margin-right:8px;"></span>
-        <span class="close-x" style="position:static;" onclick="aiToggle()">✕</span>
-      </div>
-    </div>
-    <div id="ai-msgs" style="flex:1; overflow-y:auto; border:1px solid var(--line); border-radius:10px; padding:12px; background:var(--bg);"></div>
-    <div style="display:flex; gap:8px; margin-top:12px;">
-      <textarea id="ai-input" placeholder="问问我今天吃什么 / 帮我推荐减脂餐…" style="flex:1; padding:10px; border:1px solid var(--line); border-radius:8px; font-family:var(--font); font-size:14px; min-height:48px; resize:vertical;" onkeydown="if(event.key==='Enter'&&!event.shiftKey){event.preventDefault();aiSend();}"></textarea>
-      <button class="btn primary" onclick="aiSend()" style="align-self:flex-end;">发送</button>
-    </div>
-    <div id="ai-hint" style="font-size:12px; color:var(--muted); margin-top:8px;">提示：需要电脑上先启动本地代理（deepseek-proxy.js），并在脚本里填好 DeepSeek API Key。</div>
-  </div>
-</div>
 
 <script>
 /* ================= 数据 ================= */
@@ -1436,10 +1422,42 @@ function rollPool(){
   return recipes.filter(r=> rollFilter==='all' || r.category===rollFilter);
 }
 let rollTimer=null;
-let rollResult = null;   // 随机转出的结果菜
+let rollResults = [];    // 随机转出的结果菜（数组）
+let rollIndex = 0;       // 当前轮播位置
 function rollShowRecipe(){
-  if(!rollResult) return;
-  openDetail(rollResult.id);
+  const r = rollResults[rollIndex];
+  if(!r) return;
+  openDetail(r.id);
+}
+function rollImgClick(){ rollShowRecipe(); }
+function renderRollCarousel(){
+  const img=document.getElementById('roll-img');
+  const name=document.getElementById('roll-name');
+  const hint=document.getElementById('roll-hint');
+  const prev=document.getElementById('roll-prev');
+  const next=document.getElementById('roll-next');
+  const dots=document.getElementById('roll-dots');
+  rollIndex = Math.max(0, Math.min(rollIndex, rollResults.length-1));
+  const r = rollResults[rollIndex];
+  img.src = r.image||''; img.classList.add('show');
+  name.style.display='block';
+  name.textContent = r.name;
+  // 多道菜时显示左右滑动按钮和指示点
+  const multi = rollResults.length > 1;
+  prev.style.display = next.style.display = multi ? 'flex' : 'none';
+  dots.style.display = multi ? 'flex' : 'none';
+  dots.innerHTML = rollResults.map((_,i)=>`<span class="dot ${i===rollIndex?'on':''}" onclick="rollGo(${i})"></span>`).join('');
+  hint.classList.remove('hidden');
+  hint.textContent = multi ? `第 ${rollIndex+1}/${rollResults.length} 道 · 点图片或菜名看食谱` : '点菜名或图片看这道菜的食谱吧';
+}
+function rollMove(dir){
+  if(rollResults.length < 2) return;
+  rollIndex = (rollIndex + dir + rollResults.length) % rollResults.length;
+  renderRollCarousel();
+}
+function rollGo(i){
+  rollIndex = i;
+  renderRollCarousel();
 }
 function startRoll(){
   if(rollTimer) return;
@@ -1449,8 +1467,13 @@ function startRoll(){
   const img=document.getElementById('roll-img');
   const name=document.getElementById('roll-name');
   const hint=document.getElementById('roll-hint');
-  name.style.display='none'; img.classList.remove('show'); hint.classList.add('hidden'); btn.textContent='……';
-  rollResult = null;
+  const prev=document.getElementById('roll-prev');
+  const next=document.getElementById('roll-next');
+  const dots=document.getElementById('roll-dots');
+  name.style.display='none'; img.classList.remove('show'); hint.classList.add('hidden');
+  prev.style.display='none'; next.style.display='none'; dots.style.display='none';
+  btn.textContent='……';
+  rollResults = [];
   let i=0;
   const dur = 1300 + Math.random()*700;
   rollTimer = setInterval(()=>{
@@ -1465,15 +1488,9 @@ function finishRoll(pool){
   const arr = [...pool];
   for(let i=arr.length-1;i>0;i--){ const j=Math.floor(Math.random()*(i+1)); [arr[i],arr[j]]=[arr[j],arr[i]]; }
   const res = arr.slice(0, Math.min(rollCount, arr.length));
-  const img=document.getElementById('roll-img');
-  const name=document.getElementById('roll-name');
-  const hint=document.getElementById('roll-hint');
-  img.src=res[0].image||''; img.classList.add('show');
-  rollResult = res[0];
-  name.style.display='block';
-  name.textContent = res.map(r=>r.name).join(' · ');
-  hint.classList.remove('hidden');
-  hint.textContent = res.length>1? '命运选了这几道，点菜名看食谱' : '点菜名看这道菜的食谱吧';
+  rollResults = res;
+  rollIndex = 0;
+  renderRollCarousel();
   document.getElementById('roll-btn').textContent='再转一次！';
 }
 
@@ -1693,62 +1710,6 @@ function switchView(name){
   document.querySelectorAll('.tab-btn').forEach(b=>b.classList.toggle('active', b.dataset.view===name));
   document.querySelectorAll('.view').forEach(v=>v.classList.remove('active'));
   document.getElementById('view-'+name).classList.add('active');
-}
-
-/* ================= AI 问答助手（DeepSeek，经本地代理） ================= */
-const AI_PROXY = 'http://127.0.0.1:8867/api/chat';
-let aiOpen = false;
-function aiToggle(){
-  aiOpen = !aiOpen;
-  document.getElementById('ai-panel').classList.toggle('show', aiOpen);
-  if(aiOpen && !document.querySelector('#ai-msgs .ai-msg')){
-    aiAddBot('嗨！我是 AI 小厨神 🤖 可以问我：今天吃什么、帮我配一餐、这道菜怎么做、减脂怎么吃……');
-  }
-}
-function aiAddBubble(role, text){
-  const box = document.getElementById('ai-msgs');
-  const div = document.createElement('div');
-  div.className = 'ai-msg ' + role;
-  div.innerHTML = `<div class="bubble">${esc(text)}</div>`;
-  box.appendChild(div);
-  box.scrollTop = box.scrollHeight;
-  return div;
-}
-function aiAddBot(t){ aiAddBubble('bot', t); }
-function aiAddUser(t){ aiAddBubble('user', t); }
-function aiSetDot(ok){
-  const d = document.getElementById('ai-dot');
-  d.style.background = ok===null ? '#ccc' : (ok ? '#3d8b6a' : '#d4574f');
-}
-async function aiSend(){
-  const inp = document.getElementById('ai-input');
-  const text = inp.value.trim();
-  if(!text) return;
-  inp.value = '';
-  aiAddUser(text);
-  aiSetDot(null);
-  const thinking = aiAddBot('思考中…');
-  try{
-    const r = await fetch(AI_PROXY, {
-      method:'POST',
-      headers:{'Content-Type':'application/json'},
-      body: JSON.stringify({
-        messages:[{role:'user', content:text}],
-        system:'你是「神厨小石头」里的 AI 小厨神助手，用亲切的中文回答家常菜、营养搭配、减脂餐、烹饪技巧等问题，回答简洁实用。'
-      })
-    });
-    const data = await r.json();
-    aiSetDot(true);
-    if(data.ok){
-      thinking.querySelector('.bubble').textContent = data.text;
-    }else{
-      thinking.querySelector('.bubble').textContent = '出错了：' + (data.error||'未知错误') + '\n\n请确认电脑上已启动本地代理 deepseek-proxy.js 并填好 API Key。';
-      aiSetDot(false);
-    }
-  }catch(e){
-    aiSetDot(false);
-    thinking.querySelector('.bubble').textContent = '无法连接本地代理（' + AI_PROXY + '）\n\n请先在电脑上运行：\nset DEEPSEEK_API_KEY=sk-你的Key\nnode deepseek-proxy.js';
-  }
 }
 
 /* ================= 事件绑定 & 启动 ================= */
