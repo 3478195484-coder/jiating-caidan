@@ -552,7 +552,7 @@ const PRESET = [
    note:'先煮后炸再裹糖醋汁，小火熬糖色到琥珀色。'},
   {name:'可乐鸡翅', category:'荤菜', difficulty:'简单',
    ingredients:'鸡翅中10个，可乐一罐，生抽，姜，料酒，葱',
-   image:'https://www.themealdb.com/images/media/meals/4hzyvq1763792564.jpg',
+   image:'https://upload.wikimedia.org/wikipedia/commons/thumb/7/72/Chicken_Wings_in_Coca_Cola_Sauce.jpg/960px-Chicken_Wings_in_Coca_Cola_Sauce.jpg',
    note:'零失败入门菜，大火收汁到浓稠油亮，撒白芝麻。'},
   {name:'蛋花汤', category:'汤羹', difficulty:'简单',
    ingredients:'鸡蛋2个，紫菜，虾皮，葱花，盐，香油',
@@ -601,7 +601,7 @@ const PRESET = [
   /* ---- 甜品 ---- */
   {name:'糖水', category:'甜品', difficulty:'简单',
    ingredients:'番薯，姜，冰糖，水',
-   image:'https://upload.wikimedia.org/wikipedia/commons/thumb/7/77/Sweet_patatoes_soup_in_home.jpg/960px-Sweet_patatoes_soup_in_home.jpg',
+   image:'https://upload.wikimedia.org/wikipedia/commons/thumb/0/07/HK_SKD_TKO_%E5%B0%87%E8%BB%8D%E6%BE%B3_Tseung_Kwan_O_%E6%97%A5%E5%87%BA%E5%BA%B7%E5%9F%8E_Lohas_Park_%E5%95%86%E5%A0%B4_the_Lohas_mall_shop_%E9%99%B6%E6%BA%90%E4%B8%AD%E8%8F%9C_Sportful_Garden_Restaurant_%E7%B4%85%E8%B1%86%E7%B3%96%E6%B0%B4_Red_bean_dessert_soup_February_2024_R12S_01.jpg/960px-thumbnail.jpg',
    note:'广式番薯糖水，姜片暖胃，甜润可口。'},
   {name:'酒酿冰粉', category:'甜品', difficulty:'简单',
    ingredients:'冰粉，酒酿，红糖水，花生碎，葡萄干',
@@ -613,7 +613,7 @@ const PRESET = [
    note:'经典意式甜点，冷藏一夜更入味，筛一层厚可可粉。'},
   {name:'蛋糕', category:'甜品', difficulty:'中等',
    ingredients:'低筋面粉，鸡蛋，牛奶，细砂糖，淡奶油',
-   image:'https://upload.wikimedia.org/wikipedia/commons/thumb/e/ef/Piece_of_chocolate_cake_on_a_white_plate_decorated_with_chocolate_sauce.jpg/960px-Piece_of_chocolate_cake_on_a_white_plate_decorated_with_chocolate_sauce.jpg',
+   image:'https://upload.wikimedia.org/wikipedia/commons/9/98/Hummingbird_cake_-_homemade.jpg',
    note:'戚风打底，松软湿润，生日派对必备。'},
   {name:'柠檬挞', category:'甜品', difficulty:'中等',
    ingredients:'黄油，面粉，鸡蛋，柠檬汁，糖，柠檬皮屑',
@@ -650,7 +650,7 @@ const PRESET = [
    note:'消暑开胃，冷藏后风味更佳，酸酸甜甜超解腻。'},
   {name:'山楂汁', category:'饮品', difficulty:'简单',
    ingredients:'山楂，冰糖，水',
-   image:'https://upload.wikimedia.org/wikipedia/commons/thumb/8/82/Crataegus_pinnatifida_kz01.jpg/960px-Crataegus_pinnatifida_kz01.jpg',
+   image:'https://upload.wikimedia.org/wikipedia/commons/thumb/f/f6/Hawthorn_berries_-_geograph.org.uk_-_7642550.jpg/960px-Hawthorn_berries_-_geograph.org.uk_-_7642550.jpg',
    note:'山楂煮水，酸甜开胃，助消化。'},
   {name:'青柠汁', category:'饮品', difficulty:'简单',
    ingredients:'青柠，蜂蜜，薄荷叶，冰水',
@@ -666,7 +666,7 @@ const PRESET = [
    note:'鲜果煮红茶，果香茶香交织，热饮冷饮都好喝。'},
   {name:'酸奶', category:'饮品', difficulty:'简单',
    ingredients:'牛奶，酸奶菌粉，细砂糖',
-   image:'https://upload.wikimedia.org/wikipedia/commons/thumb/2/28/Cup_of_Frozen_Yogurt_%2815840156083%29.jpg/960px-Cup_of_Frozen_Yogurt_%2815840156083%29.jpg',
+   image:'https://upload.wikimedia.org/wikipedia/commons/thumb/3/3e/Yogurt_drink.jpg/960px-Yogurt_drink.jpg',
    note:'发酵8小时，丝滑浓稠，配水果坚果更棒。'},
   /* ---- 水果 ---- */
   {name:'苹果', category:'水果', difficulty:'简单',
@@ -687,7 +687,7 @@ const PRESET = [
    note:'护眼小浆果，直接吃或拌酸奶都好。'},
   {name:'榴莲', category:'水果', difficulty:'简单',
    ingredients:'榴莲',
-   image:'https://upload.wikimedia.org/wikipedia/commons/thumb/b/b7/Durio_zibethinus_115520164.jpg/960px-Durio_zibethinus_115520164.jpg',
+   image:'https://upload.wikimedia.org/wikipedia/commons/f/f5/Durian_Pulp_2a.JPG',
    note:'水果之王，爱的人爱死，恨的人恨死。'},
   {name:'菠萝', category:'水果', difficulty:'简单',
    ingredients:'菠萝',
@@ -775,6 +775,21 @@ function loadRecipes(){
       recipes.forEach(r=>{ if(IMG_FIX[r.image]){ r.image = IMG_FIX[r.image]; imgChanged = true; } });
       if(imgChanged) saveRecipes();
       localStorage.setItem('fammenu.imgfix','1');
+    }
+    // 图片更换迁移2：可乐鸡翅/糖水/蛋糕/山楂汁/酸奶/榴莲 换更贴切的图（只匹配旧URL，不覆盖用户自设图）
+    if(!localStorage.getItem('fammenu.imgfix2')){
+      const IMG_FIX2 = {
+        'https://www.themealdb.com/images/media/meals/4hzyvq1763792564.jpg':'https://upload.wikimedia.org/wikipedia/commons/thumb/7/72/Chicken_Wings_in_Coca_Cola_Sauce.jpg/960px-Chicken_Wings_in_Coca_Cola_Sauce.jpg',
+        'https://upload.wikimedia.org/wikipedia/commons/thumb/7/77/Sweet_patatoes_soup_in_home.jpg/960px-Sweet_patatoes_soup_in_home.jpg':'https://upload.wikimedia.org/wikipedia/commons/thumb/0/07/HK_SKD_TKO_%E5%B0%87%E8%BB%8D%E6%BE%B3_Tseung_Kwan_O_%E6%97%A5%E5%87%BA%E5%BA%B7%E5%9F%8E_Lohas_Park_%E5%95%86%E5%A0%B4_the_Lohas_mall_shop_%E9%99%B6%E6%BA%90%E4%B8%AD%E8%8F%9C_Sportful_Garden_Restaurant_%E7%B4%85%E8%B1%86%E7%B3%96%E6%B0%B4_Red_bean_dessert_soup_February_2024_R12S_01.jpg/960px-thumbnail.jpg',
+        'https://upload.wikimedia.org/wikipedia/commons/thumb/e/ef/Piece_of_chocolate_cake_on_a_white_plate_decorated_with_chocolate_sauce.jpg/960px-Piece_of_chocolate_cake_on_a_white_plate_decorated_with_chocolate_sauce.jpg':'https://upload.wikimedia.org/wikipedia/commons/9/98/Hummingbird_cake_-_homemade.jpg',
+        'https://upload.wikimedia.org/wikipedia/commons/thumb/8/82/Crataegus_pinnatifida_kz01.jpg/960px-Crataegus_pinnatifida_kz01.jpg':'https://upload.wikimedia.org/wikipedia/commons/thumb/f/f6/Hawthorn_berries_-_geograph.org.uk_-_7642550.jpg/960px-Hawthorn_berries_-_geograph.org.uk_-_7642550.jpg',
+        'https://upload.wikimedia.org/wikipedia/commons/thumb/2/28/Cup_of_Frozen_Yogurt_%2815840156083%29.jpg/960px-Cup_of_Frozen_Yogurt_%2815840156083%29.jpg':'https://upload.wikimedia.org/wikipedia/commons/thumb/3/3e/Yogurt_drink.jpg/960px-Yogurt_drink.jpg',
+        'https://upload.wikimedia.org/wikipedia/commons/thumb/b/b7/Durio_zibethinus_115520164.jpg/960px-Durio_zibethinus_115520164.jpg':'https://upload.wikimedia.org/wikipedia/commons/f/f5/Durian_Pulp_2a.JPG'
+      };
+      let img2Changed = false;
+      recipes.forEach(r=>{ if(IMG_FIX2[r.image]){ r.image = IMG_FIX2[r.image]; img2Changed = true; } });
+      if(img2Changed) saveRecipes();
+      localStorage.setItem('fammenu.imgfix2','1');
     }
     // 预置菜增量迁移：甜品/饮品/水果为V3批次，馒头/馕为V4批次；按名称合并，只补新增批次（不打扰用户已删/已改的旧菜）
     const presetV = parseInt(localStorage.getItem('fammenu.presetVersion')||'0', 10);
