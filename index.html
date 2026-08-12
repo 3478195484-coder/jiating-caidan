@@ -232,9 +232,16 @@
   .menu-item.unchecked{opacity:.45;}
   .menu-ops{display:flex; gap:12px; flex-wrap:wrap; margin:14px 0 4px; align-items:center;}
   .shop-list{background:var(--card); border:1px dashed var(--accent); border-radius:10px; padding:14px 18px; margin-top:14px;}
-  .shop-list ul{list-style:none; margin-top:8px;}
-  .shop-list li{padding:3px 0; font-size:14.5px; border-bottom:1px dashed var(--line);}
-  .shop-list li::before{content:'✓ '; color:var(--accent);}
+  .shop-group{margin-top:10px;}
+  .shop-group-title{font-size:14px; font-weight:700; color:var(--accent-d); padding:4px 0; border-bottom:1px solid var(--line); margin-bottom:4px;}
+  .shop-group ul{list-style:none;}
+  .shop-group li{padding:4px 0; font-size:14.5px; border-bottom:1px dashed var(--line); display:flex; align-items:center; gap:8px;}
+  .shop-group li label{display:flex; align-items:center; gap:8px; cursor:pointer; flex:1;}
+  .shop-group li input[type=checkbox]{width:16px; height:16px; accent-color:var(--accent); cursor:pointer; flex:none;}
+  .shop-group li .cnt{color:var(--muted); font-size:13px; margin-left:auto;}
+  .shop-group li.done{opacity:.45;}
+  .shop-group li.done .name{text-decoration:line-through;}
+  .shop-empty{color:var(--muted); font-size:14px; padding:6px 0;}
 
   /* ============ 弹窗 ============ */
   .mask{
@@ -431,9 +438,15 @@
     </div>
 
     <div id="shop-box" class="shop-list" style="display:none;">
-      <b>🛒 今日采购清单</b>
-      <ul id="shop-list"></ul>
-      <div style="margin-top:8px; font-size:13px; color:var(--muted);">勾选掉不需要的菜，清单会自动更新哦</div>
+      <div style="display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:8px;">
+        <b>🛒 今日采购清单</b>
+        <span style="font-size:13px; color:var(--muted);">勾选掉不需要的菜，划掉可标记已买</span>
+      </div>
+      <div id="shop-groups"></div>
+      <div style="margin-top:10px; display:flex; gap:10px; flex-wrap:wrap;">
+        <button class="btn sm" onclick="shopAll(true)">☑ 全选</button>
+        <button class="btn sm" onclick="shopAll(false)">☐ 全不选</button>
+      </div>
     </div>
 
     <div id="share-box" class="share-box" style="display:none;">
@@ -1345,21 +1358,70 @@ function importShared(){
 }
 
 /* ================= 采购清单 ================= */
+// 食材分类：荤/素/佐料/配菜/水果/其他
+const SHOP_CATS = ['荤类','素类','佐料','配菜','水果','其他'];
+const SHOP_ICON = {'荤类':'🥩','素类':'🥬','佐料':'🧂','配菜':'🥕','水果':'🍎','其他':'🛒'};
+// 关键词匹配（按优先级）：命中即归入该类
+const SHOP_RULES = [
+  ['水果', /苹果|香蕉|草莓|蓝莓|榴莲|菠萝|桃子|芭乐|西瓜|猕猴桃|橙|葡萄|枣|樱桃|梨|荔枝|牛油果|柠檬|山楂|柚子|圣女果|小番茄|雪梨|桃子/],
+  ['荤类', /肉|猪|牛|羊|鸡|鸭|鱼|虾|排骨|培根|火腿|腩|腿|翅|胸|蛋|蟹|贝|肠|肝/],
+  ['配菜', /胡萝卜|白萝卜|青萝卜|花生|核桃|杏仁|葡萄干|木耳|粉丝|豌豆|玉米|板栗|洋葱|香菜|葱头/],
+  ['素类', /菜|豆腐|瓜|豆|萝卜|茄|笋|菇|藕|苗|芹|薯|芽|西兰花|西红柿|番茄|青菜|菠菜|白菜|包菜|蒜苗/],
+  ['佐料', /盐|糖|酱|醋|油|酒|椒|葱|姜|蒜|香料|八角|香叶|桂皮|草果|花椒|干辣椒|蚝油|生抽|老抽|酱油|香油|芝麻|蜂蜜|冰糖|白糖|红糖|可乐|啤酒|黄油|芝士|奶酪|陈皮|甘草|乌梅|枸杞|红枣|桂花|香草|牛奶|淀粉|水/]
+];
+function classifyIng(ing){
+  for(const [cat, re] of SHOP_RULES){
+    if(re.test(ing)) return cat;
+  }
+  return '其他';
+}
 function toggleShopList(){
   const box=document.getElementById('shop-box');
   const list=checkedMenu();
   if(!list.length){ toast('先勾选需要采购的菜'); return; }
+  // 先合并食材（去重+计数）
   const merged={};
   list.forEach(r=>{
     (r.ingredients||'').split(/[,，、;；]/).filter(Boolean).forEach(ing=>{
-      const base=ing.replace(/\d+(\.\d+)?(克|g|斤|个|颗|勺|条|罐)?/g,'').trim();
-      merged[base]=(merged[base]||0)+1;
+      const base=ing.replace(/\d+(\.\d+)?(克|g|斤|个|颗|勺|条|罐|根|块|片|只)?/g,'').trim();
+      if(base) merged[base]=(merged[base]||0)+1;
     });
   });
-  document.getElementById('shop-list').innerHTML =
-    Object.entries(merged).map(([k,v])=>`<li>${esc(k)}${v>1?` <span style="color:var(--accent)">×${v}</span>`:''}</li>`).join('');
+  // 按分类分组
+  const groups={};
+  SHOP_CATS.forEach(c=>groups[c]=[]);
+  Object.entries(merged).forEach(([name,count])=>{
+    groups[classifyIng(name)].push({name,count});
+  });
+  const wrap=document.getElementById('shop-groups');
+  wrap.innerHTML = SHOP_CATS.map(cat=>{
+    const items=groups[cat];
+    if(!items.length) return '';
+    return `
+      <div class="shop-group">
+        <div class="shop-group-title">${SHOP_ICON[cat]} ${cat}</div>
+        <ul>
+          ${items.map(it=>`
+            <li id="shopitem-${cat}-${esc(it.name)}">
+              <label>
+                <input type="checkbox" checked onchange="toggleShopItem(this)">
+                <span class="name">${esc(it.name)}</span>
+              </label>
+              ${it.count>1?`<span class="cnt">×${it.count}</span>`:''}
+            </li>`).join('')}
+        </ul>
+      </div>`;
+  }).join('');
   box.style.display = box.style.display==='none'? 'block':'none';
   if(box.style.display!=='none') box.scrollIntoView({behavior:'smooth', block:'center'});
+}
+function toggleShopItem(cb){
+  const li = cb.closest ? cb.closest('li') : cb.parentNode.parentNode;
+  if(li) li.classList.toggle('done', !cb.checked);
+}
+function shopAll(checked){
+  document.querySelectorAll('#shop-groups input[type=checkbox]').forEach(cb=> cb.checked = checked);
+  document.querySelectorAll('#shop-groups li').forEach(li=> li.classList.toggle('done', !checked));
 }
 
 /* ================= 通用 ================= */
