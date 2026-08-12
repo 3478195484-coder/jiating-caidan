@@ -187,7 +187,7 @@
     box-shadow:0 1px 3px rgba(0,0,0,.05);
   }
   .slot img{width:100%; height:100%; object-fit:cover; position:absolute; inset:0; opacity:0; transition:opacity .15s;}
-  .slot img.show{opacity:1;}
+  .slot img.show{opacity:1; cursor:pointer;}
   .slot .name{
     position:relative; z-index:2; font-size:28px; letter-spacing:2px;
     background:rgba(255,255,255,.94); padding:6px 22px;
@@ -379,7 +379,7 @@
 
     <div class="slot-wrap">
       <div class="slot">
-        <img id="roll-img" alt="">
+        <img id="roll-img" alt="" onclick="rollShowRecipe()">
         <div class="hint" id="roll-hint">准备好了吗？按下面的大按钮 👇</div>
         <div class="name" id="roll-name" style="display:none;"></div>
       </div>
@@ -1184,6 +1184,11 @@ function rollPool(){
   return recipes.filter(r=> rollFilter==='all' || r.category===rollFilter);
 }
 let rollTimer=null;
+let rollResult = null;   // 随机转出的结果菜
+function rollShowRecipe(){
+  if(!rollResult) return;
+  openDetail(rollResult.id);
+}
 function startRoll(){
   if(rollTimer) return;
   const pool = rollPool();
@@ -1193,6 +1198,7 @@ function startRoll(){
   const name=document.getElementById('roll-name');
   const hint=document.getElementById('roll-hint');
   name.style.display='none'; img.classList.remove('show'); hint.classList.add('hidden'); btn.textContent='……';
+  rollResult = null;
   let i=0;
   const dur = 1300 + Math.random()*700;
   rollTimer = setInterval(()=>{
@@ -1211,10 +1217,11 @@ function finishRoll(pool){
   const name=document.getElementById('roll-name');
   const hint=document.getElementById('roll-hint');
   img.src=res[0].image||''; img.classList.add('show');
+  rollResult = res[0];
   name.style.display='block';
   name.textContent = res.map(r=>r.name).join(' · ');
   hint.classList.remove('hidden');
-  hint.textContent = res.length>1? '命运选了这几道，开动吧！' : '今晚就它了，开动吧！';
+  hint.textContent = res.length>1? '命运选了这几道，点图片看食谱' : '点图片看这道菜的食谱吧';
   document.getElementById('roll-btn').textContent='再转一次！';
 }
 
