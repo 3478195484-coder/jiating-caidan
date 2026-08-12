@@ -821,27 +821,27 @@ const PRESET = [
   {name:'肯德基', category:'快餐', difficulty:'简单',
    ingredients:'炸鸡，汉堡，薯条',
    calories:600,
-   image:'https://upload.wikimedia.org/wikipedia/commons/thumb/3/30/KFC_Kentucky_Fried_Chicken_Filiale_in_L%C3%BCbeck.jpg/960px-KFC_Kentucky_Fried_Chicken_Filiale_in_L%C3%BCbeck.jpg',
+   image:'https://upload.wikimedia.org/wikipedia/commons/thumb/3/3e/KFC_-_Pressure-fried_Chicken_-_Howrah_2014-03-23_9718.JPG/960px-KFC_-_Pressure-fried_Chicken_-_Howrah_2014-03-23_9718.JPG',
    note:'经典美式快餐，香脆多汁。'},
   {name:'麦当劳', category:'快餐', difficulty:'简单',
    ingredients:'巨无霸汉堡，薯条，可乐',
    calories:650,
-   image:'https://upload.wikimedia.org/wikipedia/commons/thumb/9/9a/Big_Mac_hamburger.jpg/960px-Big_Mac_hamburger.jpg',
+   image:'https://upload.wikimedia.org/wikipedia/commons/thumb/5/58/McDonald%27s_Chicken_Cheese_Burger_set_%28Fried_potato_%26_Fanta_Grape%29.jpg/960px-McDonald%27s_Chicken_Cheese_Burger_set_%28Fried_potato_%26_Fanta_Grape%29.jpg',
    note:'招牌巨无霸，全球经典。'},
   {name:'德克士', category:'快餐', difficulty:'简单',
    ingredients:'脆皮炸鸡，鸡肉卷，米饭套餐',
    calories:550,
-   image:'https://upload.wikimedia.org/wikipedia/commons/thumb/3/3e/Spicy_Wings%2C_Rice_Chicken_Burger%2C_Teriyaki_Chicken_on_Rice_-_Dicos_Fried_Chicken_%281649134072%29.jpg/960px-Spic',
+   image:'https://upload.wikimedia.org/wikipedia/commons/thumb/8/8e/Fried_chicken_pieces_coated_in_sauce_with_sesame_seeds_2025.jpg/960px-Fried_chicken_pieces_coated_in_sauce_with_sesame_seeds_2025.jpg',
    note:'台式风味，香酥鸡腿堡有名。'},
   {name:'塔斯汀', category:'快餐', difficulty:'简单',
    ingredients:'手擀汉堡，现烤鸡排，薯条',
    calories:500,
-   image:'https://upload.wikimedia.org/wikipedia/commons/thumb/e/e0/TASITING_Burger_at_Tongzhou_Liyuan_%2820240412164818%29.jpg/960px-TASITING_Burger_at_Tongzhou_Liyuan_%2820240412164818%29.jpg',
+   image:'https://upload.wikimedia.org/wikipedia/commons/thumb/c/c5/Roujiamo.jpg/960px-Roujiamo.jpg',
    note:'现烤汉堡胚，皮脆料足。'},
   {name:'华莱士', category:'快餐', difficulty:'简单',
    ingredients:'炸鸡套餐，汉堡，可乐',
    calories:520,
-   image:'https://upload.wikimedia.org/wikipedia/commons/thumb/2/2c/Fried-Chicken-Set.jpg/960px-Fried-Chicken-Set.jpg',
+   image:'https://upload.wikimedia.org/wikipedia/commons/thumb/5/5c/Fried_chicken_legs%2C_Rostov-on-Don%2C_Russia.jpg/960px-Fried_chicken_legs%2C_Rostov-on-Don%2C_Russia.jpg',
    note:'平价亲民，炸鸡汉堡套餐管饱。'}
 ];
 
@@ -892,6 +892,26 @@ function loadRecipes(){
       recipes.forEach(r=>{ if(IMG_FIX2[r.image]){ r.image = IMG_FIX2[r.image]; img2Changed = true; } });
       if(img2Changed) saveRecipes();
       localStorage.setItem('fammenu.imgfix2','1');
+    }
+    // 快餐图片更换：换掉店铺外观照，改用美食实拍（只匹配旧URL，不覆盖用户自设图）
+    if(!localStorage.getItem('fammenu.imgfix3')){
+      const IMG_FIX3 = {
+        'https://upload.wikimedia.org/wikipedia/commons/thumb/3/30/KFC_Kentucky_Fried_Chicken_Filiale_in_L%C3%BCbeck.jpg/960px-KFC_Kentucky_Fried_Chicken_Filiale_in_L%C3%BCbeck.jpg':'https://upload.wikimedia.org/wikipedia/commons/thumb/3/3e/KFC_-_Pressure-fried_Chicken_-_Howrah_2014-03-23_9718.JPG/960px-KFC_-_Pressure-fried_Chicken_-_Howrah_2014-03-23_9718.JPG',
+        'https://upload.wikimedia.org/wikipedia/commons/thumb/9/9a/Big_Mac_hamburger.jpg/960px-Big_Mac_hamburger.jpg':'https://upload.wikimedia.org/wikipedia/commons/thumb/5/58/McDonald%27s_Chicken_Cheese_Burger_set_%28Fried_potato_%26_Fanta_Grape%29.jpg/960px-McDonald%27s_Chicken_Cheese_Burger_set_%28Fried_potato_%26_Fanta_Grape%29.jpg',
+        'https://upload.wikimedia.org/wikipedia/commons/thumb/e/e0/TASITING_Burger_at_Tongzhou_Liyuan_%2820240412164818%29.jpg/960px-TASITING_Burger_at_Tongzhou_Liyuan_%2820240412164818%29.jpg':'https://upload.wikimedia.org/wikipedia/commons/thumb/c/c5/Roujiamo.jpg/960px-Roujiamo.jpg',
+        'https://upload.wikimedia.org/wikipedia/commons/thumb/2/2c/Fried-Chicken-Set.jpg/960px-Fried-Chicken-Set.jpg':'https://upload.wikimedia.org/wikipedia/commons/thumb/5/5c/Fried_chicken_legs%2C_Rostov-on-Don%2C_Russia.jpg/960px-Fried_chicken_legs%2C_Rostov-on-Don%2C_Russia.jpg'
+      };
+      // 兼容德克士旧截断URL（以 Spic 结尾的残缺链接）
+      let img3Changed = false;
+      recipes.forEach(r=>{
+        if(r.image && r.image.endsWith('/960px-Spic')){
+          r.image = 'https://upload.wikimedia.org/wikipedia/commons/thumb/8/8e/Fried_chicken_pieces_coated_in_sauce_with_sesame_seeds_2025.jpg/960px-Fried_chicken_pieces_coated_in_sauce_with_sesame_seeds_2025.jpg';
+          img3Changed = true;
+        }
+        else if(IMG_FIX3[r.image]){ r.image = IMG_FIX3[r.image]; img3Changed = true; }
+      });
+      if(img3Changed) saveRecipes();
+      localStorage.setItem('fammenu.imgfix3','1');
     }
     // 预置菜增量迁移：甜品/饮品/水果为V3批次，馒头/馕为V4批次；按名称合并，只补新增批次（不打扰用户已删/已改的旧菜）
     const presetV = parseInt(localStorage.getItem('fammenu.presetVersion')||'0', 10);
