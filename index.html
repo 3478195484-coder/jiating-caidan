@@ -186,25 +186,16 @@
     position:relative; overflow:hidden;
     box-shadow:0 1px 3px rgba(0,0,0,.05);
   }
-  .slot .roll-carousel{position:absolute; inset:0; width:100%; height:100%;}
+  .slot .roll-carousel{position:absolute; inset:0; width:100%; height:100%; touch-action:pan-y;}
   .slot img{width:100%; height:100%; object-fit:cover; position:absolute; inset:0; opacity:0; transition:opacity .15s; left:0; top:0;}
   .slot img.show{opacity:1; cursor:pointer;}
-  .slot .roll-nav{
-    position:absolute; top:50%; transform:translateY(-50%); z-index:5;
-    width:34px; height:34px; border-radius:50%; border:none; cursor:pointer;
-    background:rgba(255,255,255,.85); color:var(--text); font-size:20px; line-height:1;
-    box-shadow:0 2px 6px rgba(0,0,0,.2); display:none; align-items:center; justify-content:center;
-  }
-  .slot .roll-nav:hover{background:#fff;}
-  .slot .roll-prev{left:10px;}
-  .slot .roll-next{right:10px;}
   .slot .roll-dots{
-    position:absolute; bottom:42px; left:50%; transform:translateX(-50%); z-index:5;
+    position:absolute; bottom:8px; left:50%; transform:translateX(-50%); z-index:5;
     display:none; gap:6px;
   }
   .slot .roll-dots .dot{
-    width:8px; height:8px; border-radius:50%; background:rgba(255,255,255,.6); cursor:pointer;
-    border:1px solid rgba(0,0,0,.2);
+    width:8px; height:8px; border-radius:50%; background:rgba(255,255,255,.65); cursor:pointer;
+    border:1px solid rgba(0,0,0,.25);
   }
   .slot .roll-dots .dot.on{background:var(--accent);}
   .slot .name{
@@ -215,8 +206,11 @@
     cursor:pointer; transition:border-color .15s, color .15s;
   }
   .slot .name:hover{border-color:var(--accent); color:var(--accent-d);}
-  .slot .hint{position:relative; z-index:2; font-size:14px; color:var(--muted);}
-  .slot .hint.hidden{visibility:hidden;}
+  .hint{
+    text-align:center; font-size:14px; color:var(--muted);
+    margin:12px 0 0; min-height:20px;
+  }
+  .hint.hidden{visibility:hidden;}
   .roll-row{display:flex; gap:14px; justify-content:center; align-items:center; margin-top:18px; flex-wrap:wrap;}
   .roll-btn{font-size:24px; padding:13px 42px; background:var(--accent); color:#fff; border-radius:8px; letter-spacing:3px; border:1px solid var(--accent); transition:background .15s;}
   .roll-btn:hover{background:var(--accent-d);}
@@ -405,12 +399,10 @@
         <div class="roll-carousel" id="roll-carousel">
           <img id="roll-img" alt="" onclick="rollImgClick()">
         </div>
-        <button class="roll-nav roll-prev" id="roll-prev" onclick="rollMove(-1)">‹</button>
-        <button class="roll-nav roll-next" id="roll-next" onclick="rollMove(1)">›</button>
         <div class="roll-dots" id="roll-dots"></div>
-        <div class="hint" id="roll-hint">准备好了吗？按下面的大按钮 👇</div>
         <div class="name" id="roll-name" style="display:none;" onclick="rollShowRecipe()"></div>
       </div>
+      <div class="hint" id="roll-hint">准备好了吗？按下面的大按钮 👇</div>
       <div class="roll-row">
         <div class="count-stepper">
           抽 <button class="btn sm" onclick="changeRollCount(-1)">−</button>
@@ -1434,21 +1426,18 @@ function renderRollCarousel(){
   const img=document.getElementById('roll-img');
   const name=document.getElementById('roll-name');
   const hint=document.getElementById('roll-hint');
-  const prev=document.getElementById('roll-prev');
-  const next=document.getElementById('roll-next');
   const dots=document.getElementById('roll-dots');
   rollIndex = Math.max(0, Math.min(rollIndex, rollResults.length-1));
   const r = rollResults[rollIndex];
   img.src = r.image||''; img.classList.add('show');
   name.style.display='block';
   name.textContent = r.name;
-  // 多道菜时显示左右滑动按钮和指示点
+  // 多道菜时显示指示点（支持左右滑动切换）
   const multi = rollResults.length > 1;
-  prev.style.display = next.style.display = multi ? 'flex' : 'none';
   dots.style.display = multi ? 'flex' : 'none';
   dots.innerHTML = rollResults.map((_,i)=>`<span class="dot ${i===rollIndex?'on':''}" onclick="rollGo(${i})"></span>`).join('');
   hint.classList.remove('hidden');
-  hint.textContent = multi ? `第 ${rollIndex+1}/${rollResults.length} 道 · 点图片或菜名看食谱` : '点菜名或图片看这道菜的食谱吧';
+  hint.textContent = multi ? `第 ${rollIndex+1}/${rollResults.length} 道 · 左右滑动看下一道，点图片或菜名看食谱` : '点菜名或图片看这道菜的食谱吧';
 }
 function rollMove(dir){
   if(rollResults.length < 2) return;
@@ -1459,6 +1448,32 @@ function rollGo(i){
   rollIndex = i;
   renderRollCarousel();
 }
+// 触摸/鼠标左右滑动切换
+let rollSwipeStartX = null;
+let rollSwipeStartY = null;
+function rollSwipeStart(ev){
+  const t = ev.touches ? ev.touches[0] : ev;
+  rollSwipeStartX = t.clientX;
+  rollSwipeStartY = t.clientY;
+}
+function rollSwipeEnd(ev){
+  if(rollSwipeStartX === null) return;
+  const t = ev.changedTouches ? ev.changedTouches[0] : ev;
+  const dx = t.clientX - rollSwipeStartX;
+  const dy = t.clientY - rollSwipeStartY;
+  rollSwipeStartX = null; rollSwipeStartY = null;
+  if(Math.abs(dx) < 40) return;            // 滑动距离不足
+  if(Math.abs(dy) > Math.abs(dx)) return;  // 竖向滑动忽略
+  rollMove(dx < 0 ? 1 : -1);               // 左滑下一道，右滑上一道
+}
+function initRollSwipe(){
+  const carousel = document.getElementById('roll-carousel');
+  if(!carousel) return;
+  carousel.addEventListener('touchstart', rollSwipeStart, {passive:true});
+  carousel.addEventListener('touchend', rollSwipeEnd, {passive:true});
+  carousel.addEventListener('mousedown', rollSwipeStart);
+  carousel.addEventListener('mouseup', rollSwipeEnd);
+}
 function startRoll(){
   if(rollTimer) return;
   const pool = rollPool();
@@ -1467,11 +1482,9 @@ function startRoll(){
   const img=document.getElementById('roll-img');
   const name=document.getElementById('roll-name');
   const hint=document.getElementById('roll-hint');
-  const prev=document.getElementById('roll-prev');
-  const next=document.getElementById('roll-next');
   const dots=document.getElementById('roll-dots');
   name.style.display='none'; img.classList.remove('show'); hint.classList.add('hidden');
-  prev.style.display='none'; next.style.display='none'; dots.style.display='none';
+  dots.style.display='none';
   btn.textContent='……';
   rollResults = [];
   let i=0;
@@ -1723,6 +1736,7 @@ document.getElementById('rc-mask').addEventListener('click', e=>{ if(e.target.id
 
 function init(){
   loadRecipes();
+  initRollSwipe();
   const params = new URLSearchParams(location.search);
   if(params.has('menu')){
     const data = decodeMenu(params.get('menu'));
