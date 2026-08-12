@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>神厨小石头</title>
+<title>神厨小石头 · Divine Chef Stone</title>
 <style>
   :root{
     --bg:#f7f5f0;            /* 暖米白背景 */
@@ -51,6 +51,8 @@
   .sticky[data-cat="甜品"]{background:#f6f0de; color:#75601f;}
   .sticky[data-cat="饮品"]{background:#e6f1ee; color:#3a6257;}
   .sticky[data-cat="水果"]{background:#f6e9e8; color:#7d4040;}
+  .sticky[data-cat="减脂餐"]{background:#e2efe7; color:#2f6e4f;}
+  .sticky[data-cat="快餐"]{background:#fbeadb; color:#9c5a1e;}
 
   /* ============ 头部 ============ */
   header.cover{
@@ -121,8 +123,9 @@
   .card .body{flex:1; min-width:0; padding:2px 0;}
   .card h3{
     font-family:var(--hand);
-    font-size:22px; letter-spacing:1px; margin:0 0 6px; line-height:1.3; color:#4a4238; font-weight:700;
+    font-size:22px; letter-spacing:1px; margin:0 0 4px; line-height:1.3; color:#4a4238; font-weight:700;
   }
+  .card .cal-row{font-size:13px; color:var(--accent-d); font-weight:600; margin-bottom:4px;}
   .card .meta{display:flex; align-items:center; gap:8px; flex-wrap:wrap; margin-bottom:6px;}
   .card .ing{font-size:13.5px; color:var(--muted); line-height:1.5; max-height:40px; overflow:hidden;
     display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical;}
@@ -306,7 +309,7 @@
   <!-- ================= 头部 ================= -->
   <header class="cover">
     <div class="big">神厨小石头</div>
-    <div class="sub-en">Stone's Royal Kitchen</div>
+    <div class="sub-en">Divine Chef Stone</div>
     <div class="sub">— 今天想吃点什么 —</div>
   </header>
 
@@ -335,6 +338,8 @@
       <button class="chip" data-f="甜品">甜品</button>
       <button class="chip" data-f="饮品">饮品</button>
       <button class="chip" data-f="水果">水果</button>
+      <button class="chip" data-f="减脂餐">减脂餐</button>
+      <button class="chip" data-f="快餐">快餐</button>
       <label class="search-box">🔍<input id="search-input" placeholder="搜菜名 / 食材…"></label>
     </div>
 
@@ -361,6 +366,8 @@
       <button class="chip" data-f="甜品">甜品</button>
       <button class="chip" data-f="饮品">饮品</button>
       <button class="chip" data-f="水果">水果</button>
+      <button class="chip" data-f="减脂餐">减脂餐</button>
+      <button class="chip" data-f="快餐">快餐</button>
     </div>
 
     <div class="slot-wrap">
@@ -406,6 +413,10 @@
         <div class="stepper"><button class="btn sm" onclick="adj('饮品',-1)">−</button><b id="n-饮品">1</b><button class="btn sm" onclick="adj('饮品',1)">＋</button></div>
         <span class="lbl">🍎 水果</span>
         <div class="stepper"><button class="btn sm" onclick="adj('水果',-1)">−</button><b id="n-水果">1</b><button class="btn sm" onclick="adj('水果',1)">＋</button></div>
+        <span class="lbl">🥗 减脂餐</span>
+        <div class="stepper"><button class="btn sm" onclick="adj('减脂餐',-1)">−</button><b id="n-减脂餐">1</b><button class="btn sm" onclick="adj('减脂餐',1)">＋</button></div>
+        <span class="lbl">🍔 快餐</span>
+        <div class="stepper"><button class="btn sm" onclick="adj('快餐',-1)">−</button><b id="n-快餐">1</b><button class="btn sm" onclick="adj('快餐',1)">＋</button></div>
       </div>
       <div class="menu-ops">
         <button class="btn pink" onclick="generateMenu()">✨ 生成菜单</button>
@@ -458,22 +469,26 @@
       <div class="field"><label>菜名 *</label><input id="f-name" placeholder="如：红烧肉"></div>
       <div class="field-row">
         <div class="field"><label>分类</label>
-          <select id="f-cat"><option>荤菜</option><option>素菜</option><option>汤羹</option><option>凉菜</option><option>主食</option><option>甜品</option><option>饮品</option><option>水果</option></select>
+          <select id="f-cat"><option>荤菜</option><option>素菜</option><option>汤羹</option><option>凉菜</option><option>主食</option><option>甜品</option><option>饮品</option><option>水果</option><option>减脂餐</option><option>快餐</option></select>
         </div>
         <div class="field"><label>难度</label>
           <select id="f-diff"><option>简单</option><option>中等</option><option>困难</option></select>
         </div>
       </div>
       <div class="field"><label>食材（用逗号或顿号分隔）</label><textarea id="f-ing" placeholder="五花肉500g，冰糖，生抽，老抽，料酒，姜"></textarea></div>
+      <div class="field-row">
+        <div class="field"><label>热量（千卡/份）</label><input id="f-cal" type="number" min="0" placeholder="如：350"></div>
+      </div>
       <div class="field">
         <label>菜品照片</label>
         <div class="photo-row">
-          <button type="button" class="btn pink sm" onclick="pickPhoto()">📷 拍照 / 选图</button>
+          <button type="button" class="btn pink sm" onclick="pickPhoto()">📷 拍照</button>
+          <button type="button" class="btn blue sm" onclick="pickAlbum()">🖼 从相册选</button>
           <button type="button" class="btn sm" onclick="clearPhoto()" id="f-clear-photo" style="display:none;">🗑 移除照片</button>
-          <span class="photo-tip">手机端可调起相机，也可选相册图片</span>
         </div>
         <div class="photo-preview" id="f-preview" style="display:none;"><img id="f-preview-img" alt="预览"></div>
         <input type="file" id="f-file" accept="image/*" capture="environment" style="display:none;" onchange="onFilePicked(event)">
+        <input type="file" id="f-file-album" accept="image/*" style="display:none;" onchange="onFilePicked(event)">
         <details class="photo-adv"><summary>或粘贴图片链接（可选）</summary><input id="f-img" placeholder="https://… 或留空"></details>
       </div>
       <div class="field"><label>小贴士 / 做法备注</label><textarea id="f-note" placeholder="火候、秘诀……"></textarea></div>
@@ -500,227 +515,334 @@
 <script>
 /* ================= 数据 ================= */
 const LS_KEY = 'fammenu.recipes.v1';
-const CATS = ['荤菜','素菜','汤羹','凉菜','主食','甜品','饮品','水果'];
+const CATS = ['荤菜','素菜','汤羹','凉菜','主食','甜品','饮品','水果','减脂餐','快餐'];
 const DIFF_STAR = {'简单':'★','中等':'★★','困难':'★★★'};
-const EMOJI = {'荤菜':'🍖','素菜':'🥬','汤羹':'🍲','凉菜':'🥗','主食':'🍚','甜品':'🍰','饮品':'🧃','水果':'🍎'};
+const EMOJI = {'荤菜':'🍖','素菜':'🥬','汤羹':'🍲','凉菜':'🥗','主食':'🍚','甜品':'🍰','饮品':'🧃','水果':'🍎','减脂餐':'🥗','快餐':'🍔'};
 
 /* 预置 12 道家常菜（真实美食图片，来自 TheMealDB） */
 const PRESET = [
   {name:'西红柿炒鸡蛋', category:'素菜', difficulty:'简单',
    ingredients:'西红柿2个，鸡蛋3个，小葱，盐，白糖，食用油',
+   calories:180,
    image:'https://www.themealdb.com/images/media/meals/rwvw8q1765660071.jpg',
    note:'国民家常菜，酸甜下饭。鸡蛋先炒嫩盛出，再炒西红柿出汁回锅。'},
   {name:'红烧肉', category:'荤菜', difficulty:'中等',
    ingredients:'五花肉500g，冰糖，生抽，老抽，料酒，姜，八角，香叶',
+   calories:500,
    image:'https://www.themealdb.com/images/media/meals/t1hg8s1780087329.jpg',
    note:'肥而不腻入口即化，小火慢炖40分钟，最后大火收汁。'},
   {name:'宫保鸡丁', category:'荤菜', difficulty:'中等',
    ingredients:'鸡腿肉，花生米，干辣椒，花椒，葱姜蒜，生抽，醋，白糖',
+   calories:280,
    image:'https://www.themealdb.com/images/media/meals/1525872624.jpg',
    note:'糊辣荔枝口，鸡肉先腌后滑炒，酱汁里糖醋比例1:1。'},
   {name:'麻婆豆腐', category:'素菜', difficulty:'简单',
    ingredients:'嫩豆腐，牛肉末，豆瓣酱，花椒粉，蒜苗，姜蒜，淀粉',
+   calories:220,
    image:'https://www.themealdb.com/images/media/meals/1525874812.jpg',
    note:'麻、辣、烫、嫩、酥、香俱全，豆腐轻轻推炒不弄碎。'},
   {name:'清蒸鲈鱼', category:'荤菜', difficulty:'中等',
    ingredients:'鲈鱼1条，姜丝，小葱，蒸鱼豉油，料酒，食用油',
+   calories:200,
    image:'https://www.themealdb.com/images/media/meals/tqd7s21763780609.jpg',
    note:'大火足汽蒸8分钟，倒掉腥水，淋蒸鱼豉油再泼热油。'},
   {name:'糖醋排骨', category:'荤菜', difficulty:'中等',
    ingredients:'肋排500g，冰糖，香醋，生抽，料酒，姜，白芝麻',
+   calories:420,
    image:'https://www.themealdb.com/images/media/meals/1529442316.jpg',
    note:'先煮后炸再裹糖醋汁，小火熬糖色到琥珀色。'},
   {name:'可乐鸡翅', category:'荤菜', difficulty:'简单',
    ingredients:'鸡翅中10个，可乐一罐，生抽，姜，料酒，葱',
+   calories:350,
    image:'https://upload.wikimedia.org/wikipedia/commons/thumb/7/72/Chicken_Wings_in_Coca_Cola_Sauce.jpg/960px-Chicken_Wings_in_Coca_Cola_Sauce.jpg',
    note:'零失败入门菜，大火收汁到浓稠油亮，撒白芝麻。'},
   {name:'蛋花汤', category:'汤羹', difficulty:'简单',
    ingredients:'鸡蛋2个，紫菜，虾皮，葱花，盐，香油',
+   calories:70,
    image:'https://www.themealdb.com/images/media/meals/1529446137.jpg',
    note:'水开转圈淋入蛋液，边淋边搅，蛋花浮起即关火。'},
   {name:'酸辣汤', category:'汤羹', difficulty:'中等',
    ingredients:'豆腐，木耳，笋丝，鸡蛋，香醋，白胡椒，淀粉',
+   calories:90,
    image:'https://www.themealdb.com/images/media/meals/1529445893.jpg',
    note:'酸辣开胃，勾芡后淋蛋花，白胡椒是灵魂。'},
   {name:'干煸四季豆', category:'素菜', difficulty:'中等',
    ingredients:'四季豆，猪肉末，干辣椒，花椒，蒜，芽菜',
+   calories:180,
    image:'https://www.themealdb.com/images/media/meals/i0610h1765659464.jpg',
    note:'四季豆要煸到表皮起皱才香，务必熟透。'},
   {name:'拍黄瓜', category:'凉菜', difficulty:'简单',
    ingredients:'黄瓜2根，蒜末，生抽，香醋，白糖，辣椒油，香菜',
+   calories:50,
    image:'https://www.themealdb.com/images/media/meals/93iok31766436070.jpg',
    note:'拍裂更入味，冷藏半小时更爽脆。'},
   {name:'鱼香茄子', category:'素菜', difficulty:'中等',
    ingredients:'长茄子，肉末，豆瓣酱，蒜末，葱，生抽，醋，白糖',
+   calories:230,
    image:'https://www.themealdb.com/images/media/meals/1oz4nb1765687990.jpg',
    note:'鱼香汁=糖1:醋1:生抽1，茄子先过油再烧，软糯入味。'},
   {name:'白米饭', category:'主食', difficulty:'简单',
    ingredients:'大米，清水',
+   calories:230,
    image:'https://upload.wikimedia.org/wikipedia/commons/thumb/7/77/Steamed_rice_in_bowl_01.jpg/960px-Steamed_rice_in_bowl_01.jpg',
    note:'一勺一碗，松软喷香，配任何菜都合适。'},
   {name:'清汤面', category:'主食', difficulty:'简单',
    ingredients:'面条，小葱，生抽，猪油（可选），白胡椒',
+   calories:280,
    image:'https://upload.wikimedia.org/wikipedia/commons/thumb/4/45/Easy_Soy_Sauce_Noodles_%E9%99%BD%E6%98%A5%E9%BA%B5_%282%29.jpg/960px-Easy_Soy_Sauce_Noodles_%E9%99%BD%E6%98%A5%E9%BA%B5_%282%29.jpg',
    note:'汤清面滑，葱花提香，早餐夜宵都合适。'},
   {name:'蛋炒饭', category:'主食', difficulty:'中等',
    ingredients:'隔夜米饭，鸡蛋2个，葱花，火腿粒，生抽',
+   calories:450,
    image:'https://www.themealdb.com/images/media/meals/wuyd2h1765655837.jpg',
    note:'隔夜饭炒出来粒粒分明，大火快炒。'},
   {name:'牛肉面', category:'主食', difficulty:'中等',
    ingredients:'面条，牛肉，牛骨汤，青菜，香菜，辣油',
+   calories:450,
    image:'https://upload.wikimedia.org/wikipedia/commons/thumb/7/74/202308_Henan_Red-Braised_Beef_Noodle_Soup_in_Shanghai.jpg/960px-202308_Henan_Red-Braised_Beef_Noodle_Soup_in_Shanghai.jpg',
    note:'汤浓肉烂，一锅牛肉卤汁浇上去最香。'},
   {name:'馒头', category:'主食', difficulty:'简单',
    ingredients:'中筋面粉500g，酵母5g，白糖，温水',
+   calories:220,
    image:'https://upload.wikimedia.org/wikipedia/commons/thumb/0/08/ClassicwhiteMantou.jpg/960px-ClassicwhiteMantou.jpg',
    note:'松软白胖，揉面排气要到位，冷水上锅蒸15分钟。'},
   {name:'馕', category:'主食', difficulty:'中等',
    ingredients:'面粉，酵母，盐，洋葱碎，白芝麻，牛奶',
+   calories:260,
    image:'https://upload.wikimedia.org/wikipedia/commons/thumb/1/1d/Naan_baked_in_Tandoor.jpg/960px-Naan_baked_in_Tandoor.jpg',
    note:'新疆烤饼，面团抹油贴炉壁烤出虎皮花纹最香。'},
-  /* ---- 甜品 ---- */
   {name:'糖水', category:'甜品', difficulty:'简单',
    ingredients:'番薯，姜，冰糖，水',
+   calories:150,
    image:'https://upload.wikimedia.org/wikipedia/commons/thumb/0/07/HK_SKD_TKO_%E5%B0%87%E8%BB%8D%E6%BE%B3_Tseung_Kwan_O_%E6%97%A5%E5%87%BA%E5%BA%B7%E5%9F%8E_Lohas_Park_%E5%95%86%E5%A0%B4_the_Lohas_mall_shop_%E9%99%B6%E6%BA%90%E4%B8%AD%E8%8F%9C_Sportful_Garden_Restaurant_%E7%B4%85%E8%B1%86%E7%B3%96%E6%B0%B4_Red_bean_dessert_soup_February_2024_R12S_01.jpg/960px-thumbnail.jpg',
    note:'广式番薯糖水，姜片暖胃，甜润可口。'},
   {name:'酒酿冰粉', category:'甜品', difficulty:'简单',
    ingredients:'冰粉，酒酿，红糖水，花生碎，葡萄干',
+   calories:120,
    image:'https://upload.wikimedia.org/wikipedia/commons/thumb/6/6c/Bingfen_at_Beijing_Yibin_Hostel_%2820210401110614%29.jpg/960px-Bingfen_at_Beijing_Yibin_Hostel_%2820210401110614%29.jpg',
    note:'冰粉搓制Q弹，淋红糖拌酒酿，冰冰凉凉超解暑。'},
   {name:'提拉米苏', category:'甜品', difficulty:'困难',
    ingredients:'马斯卡彭芝士，手指饼干，咖啡，可可粉，鸡蛋',
+   calories:350,
    image:'https://upload.wikimedia.org/wikipedia/commons/thumb/4/42/Dolce_Tiramis%C3%B9_monoporzione.jpg/960px-Dolce_Tiramis%C3%B9_monoporzione.jpg',
    note:'经典意式甜点，冷藏一夜更入味，筛一层厚可可粉。'},
   {name:'蛋糕', category:'甜品', difficulty:'中等',
    ingredients:'低筋面粉，鸡蛋，牛奶，细砂糖，淡奶油',
+   calories:320,
    image:'https://upload.wikimedia.org/wikipedia/commons/9/98/Hummingbird_cake_-_homemade.jpg',
    note:'戚风打底，松软湿润，生日派对必备。'},
   {name:'柠檬挞', category:'甜品', difficulty:'中等',
    ingredients:'黄油，面粉，鸡蛋，柠檬汁，糖，柠檬皮屑',
+   calories:300,
    image:'https://upload.wikimedia.org/wikipedia/commons/thumb/3/38/Lemon_tart_%28cropped%29.jpg/960px-Lemon_tart_%28cropped%29.jpg',
    note:'酸酸甜甜的柠檬凝乳，挞皮酥脆，清爽不腻。'},
   {name:'巴斯克蛋糕', category:'甜品', difficulty:'中等',
    ingredients:'奶油奶酪，鸡蛋，淡奶油，细砂糖，低筋面粉',
+   calories:380,
    image:'https://upload.wikimedia.org/wikipedia/commons/thumb/6/68/Basque-style_cheesecake_in_Pepito%2C_Tokyo.jpg/960px-Basque-style_cheesecake_in_Pepito%2C_Tokyo.jpg',
    note:'高温短烤，表面焦香内里流心，新手也能做。'},
   {name:'马卡龙', category:'甜品', difficulty:'困难',
    ingredients:'杏仁粉，糖粉，蛋白，细砂糖，食用色素，夹馅',
+   calories:90,
    image:'https://upload.wikimedia.org/wikipedia/commons/thumb/4/49/Des_macarons_de_chez_Bouillet_%28mars_2023%29.jpg/960px-Des_macarons_de_chez_Bouillet_%28mars_2023%29.jpg',
    note:'裙边要晾皮到位才漂亮，夹馅冷藏后风味更佳。'},
   {name:'酸奶杯', category:'甜品', difficulty:'简单',
    ingredients:'酸奶，格兰诺拉麦片，新鲜水果，蜂蜜',
+   calories:180,
    image:'https://upload.wikimedia.org/wikipedia/commons/thumb/6/6c/Yogurt%2C_fruit%2C_granola_bowl_%2834999358091%29.jpg/960px-Yogurt%2C_fruit%2C_granola_bowl_%2834999358091%29.jpg',
    note:'层层叠叠，早餐下午茶都合适，颜值满分。'},
   {name:'泡芙', category:'甜品', difficulty:'困难',
    ingredients:'黄油，低筋面粉，鸡蛋，淡奶油，卡仕达酱',
+   calories:180,
    image:'https://upload.wikimedia.org/wikipedia/commons/thumb/b/b9/Choux-hk-777.jpg/960px-Choux-hk-777.jpg',
    note:'酥皮泡芙爆浆，烤时中途千万别开烤箱门。'},
   {name:'焦糖布丁', category:'甜品', difficulty:'简单',
    ingredients:'鸡蛋，牛奶，细砂糖，香草精',
+   calories:250,
    image:'https://upload.wikimedia.org/wikipedia/commons/9/91/Cr%C3%A8me_br%C3%BBl%C3%A9e_w._whipped_cream.jpg',
    note:'蛋奶液过筛更顺滑，小火水浴蒸烤，表面焦糖脆壳。'},
   {name:'雪媚娘', category:'甜品', difficulty:'中等',
    ingredients:'糯米粉，玉米淀粉，牛奶，淡奶油，草莓，糖',
+   calories:180,
    image:'https://upload.wikimedia.org/wikipedia/commons/thumb/8/84/Soft_rice_cake_stuffed_with_sweetened_bean_%26_strawberry%2Ckatori-city%2Cjapan.JPG/960px-Soft_rice_cake_stuffed_with_sweetened_bean_%26_strawberry%2Ckatori-city%2Cjapan.JPG',
    note:'糯米皮薄透软糯，包入奶油水果，冷藏后口感最佳。'},
-  /* ---- 饮品 ---- */
   {name:'酸梅汤', category:'饮品', difficulty:'简单',
    ingredients:'乌梅，山楂，陈皮，甘草，冰糖，桂花',
+   calories:80,
    image:'https://upload.wikimedia.org/wikipedia/commons/thumb/6/60/Sour_plum_drink.jpg/960px-Sour_plum_drink.jpg',
    note:'消暑开胃，冷藏后风味更佳，酸酸甜甜超解腻。'},
   {name:'山楂汁', category:'饮品', difficulty:'简单',
    ingredients:'山楂，冰糖，水',
+   calories:90,
    image:'https://upload.wikimedia.org/wikipedia/commons/thumb/f/f6/Hawthorn_berries_-_geograph.org.uk_-_7642550.jpg/960px-Hawthorn_berries_-_geograph.org.uk_-_7642550.jpg',
    note:'山楂煮水，酸甜开胃，助消化。'},
   {name:'青柠汁', category:'饮品', difficulty:'简单',
    ingredients:'青柠，蜂蜜，薄荷叶，冰水',
+   calories:60,
    image:'https://upload.wikimedia.org/wikipedia/commons/2/24/Lime_juice.jpg',
    note:'清新酸爽，加蜂蜜薄荷，一杯冰镇超提神。'},
   {name:'柚子茶', category:'饮品', difficulty:'简单',
    ingredients:'柚子果肉，柚子皮，蜂蜜，冰糖',
+   calories:120,
    image:'https://upload.wikimedia.org/wikipedia/commons/thumb/1/11/Korean_yuja_tea.jpg/960px-Korean_yuja_tea.jpg',
    note:'温热或冰镇皆宜，果香浓郁，润喉降火。'},
   {name:'水果茶', category:'饮品', difficulty:'简单',
    ingredients:'红茶，苹果，橙子，草莓，百香果，蜂蜜',
+   calories:110,
    image:'https://upload.wikimedia.org/wikipedia/commons/thumb/7/7e/Fruit_tea_%28hot%29.jpg/960px-Fruit_tea_%28hot%29.jpg',
    note:'鲜果煮红茶，果香茶香交织，热饮冷饮都好喝。'},
   {name:'酸奶', category:'饮品', difficulty:'简单',
    ingredients:'牛奶，酸奶菌粉，细砂糖',
+   calories:120,
    image:'https://upload.wikimedia.org/wikipedia/commons/thumb/3/3e/Yogurt_drink.jpg/960px-Yogurt_drink.jpg',
    note:'发酵8小时，丝滑浓稠，配水果坚果更棒。'},
-  /* ---- 水果 ---- */
   {name:'苹果', category:'水果', difficulty:'简单',
    ingredients:'苹果',
+   calories:95,
    image:'https://upload.wikimedia.org/wikipedia/commons/thumb/1/15/Red_Apple.jpg/960px-Red_Apple.jpg',
    note:'每天一个苹果，医生远离我。'},
   {name:'香蕉', category:'水果', difficulty:'简单',
    ingredients:'香蕉',
+   calories:105,
    image:'https://upload.wikimedia.org/wikipedia/commons/thumb/3/31/Cavendish_banana_from_Maracaibo.jpg/960px-Cavendish_banana_from_Maracaibo.jpg',
    note:'高纤饱腹，运动前后补充能量好选择。'},
   {name:'草莓', category:'水果', difficulty:'简单',
    ingredients:'草莓',
+   calories:40,
    image:'https://upload.wikimedia.org/wikipedia/commons/d/de/FraiseFruitPhoto.jpg',
    note:'香甜多汁，维生素C满满，甜点百搭。'},
   {name:'蓝莓', category:'水果', difficulty:'简单',
    ingredients:'蓝莓',
+   calories:60,
    image:'https://upload.wikimedia.org/wikipedia/commons/thumb/7/7d/Dish_of_blueberries.jpg/960px-Dish_of_blueberries.jpg',
    note:'护眼小浆果，直接吃或拌酸奶都好。'},
   {name:'榴莲', category:'水果', difficulty:'简单',
    ingredients:'榴莲',
+   calories:150,
    image:'https://upload.wikimedia.org/wikipedia/commons/f/f5/Durian_Pulp_2a.JPG',
    note:'水果之王，爱的人爱死，恨的人恨死。'},
   {name:'菠萝', category:'水果', difficulty:'简单',
    ingredients:'菠萝',
+   calories:50,
    image:'https://upload.wikimedia.org/wikipedia/commons/thumb/5/5c/Pineapple_fruit_2.jpg/960px-Pineapple_fruit_2.jpg',
    note:'酸甜多汁，盐水泡一下更不扎嘴。'},
   {name:'桃子', category:'水果', difficulty:'简单',
    ingredients:'桃子',
+   calories:60,
    image:'https://upload.wikimedia.org/wikipedia/commons/thumb/9/9e/Autumn_Red_peaches.jpg/960px-Autumn_Red_peaches.jpg',
    note:'夏秋应季水果，脆甜或软糯都好吃。'},
   {name:'芭乐', category:'水果', difficulty:'简单',
    ingredients:'芭乐（番石榴）',
+   calories:68,
    image:'https://upload.wikimedia.org/wikipedia/commons/thumb/8/84/Goiaba_vermelha.jpg/960px-Goiaba_vermelha.jpg',
    note:'清香爽脆，加酸梅粉或盐渍更开胃。'},
   {name:'西瓜', category:'水果', difficulty:'简单',
    ingredients:'西瓜',
+   calories:45,
    image:'https://upload.wikimedia.org/wikipedia/commons/thumb/0/0c/Citrullus_lanatus_03.JPG/960px-Citrullus_lanatus_03.JPG',
    note:'夏日解暑神器，冰镇后一口下去透心凉。'},
   {name:'猕猴桃', category:'水果', difficulty:'简单',
    ingredients:'猕猴桃',
+   calories:61,
    image:'https://upload.wikimedia.org/wikipedia/commons/thumb/b/b8/Kiwi_%28Actinidia_chinensis%29_1_Luc_Viatour.jpg/960px-Kiwi_%28Actinidia_chinensis%29_1_Luc_Viatour.jpg',
    note:'维生素C之王，酸甜清爽。'},
   {name:'橙子', category:'水果', difficulty:'简单',
    ingredients:'橙子',
+   calories:62,
    image:'https://upload.wikimedia.org/wikipedia/commons/thumb/e/e3/Oranges_-_whole-halved-segment.jpg/960px-Oranges_-_whole-halved-segment.jpg',
    note:'维C满满，皮还能做橙皮糖。'},
   {name:'葡萄', category:'水果', difficulty:'简单',
    ingredients:'葡萄',
+   calories:70,
    image:'https://upload.wikimedia.org/wikipedia/commons/thumb/5/5e/Wine_grapes03.jpg/960px-Wine_grapes03.jpg',
    note:'一颗颗酸甜多汁，洗净带皮吃最好。'},
   {name:'枣', category:'水果', difficulty:'简单',
    ingredients:'红枣',
+   calories:70,
    image:'https://upload.wikimedia.org/wikipedia/commons/thumb/c/c5/Ziziphus_zizyphus_MHNT.BOT.2012.10.26.jpg/960px-Ziziphus_zizyphus_MHNT.BOT.2012.10.26.jpg',
    note:'补气养血，泡水、煮粥、当零食都好。'},
   {name:'小番茄', category:'水果', difficulty:'简单',
    ingredients:'小番茄（圣女果）',
+   calories:30,
    image:'https://upload.wikimedia.org/wikipedia/commons/thumb/3/39/Cherry-Tomatoes-in-Pack.jpg/960px-Cherry-Tomatoes-in-Pack.jpg',
    note:'一口一个，酸甜爆汁，沙拉首选。'},
   {name:'樱桃', category:'水果', difficulty:'简单',
    ingredients:'樱桃',
+   calories:50,
    image:'https://upload.wikimedia.org/wikipedia/commons/thumb/b/bb/Cherry_Stella444.jpg/960px-Cherry_Stella444.jpg',
    note:'初夏限定，甜脆多汁，贵但值。'},
   {name:'梨子', category:'水果', difficulty:'简单',
    ingredients:'梨',
+   calories:58,
    image:'https://upload.wikimedia.org/wikipedia/commons/thumb/9/99/Four_pears.jpg/960px-Four_pears.jpg',
    note:'清甜润肺，炖冰糖雪梨治嗓子干痒。'},
   {name:'荔枝', category:'水果', difficulty:'简单',
    ingredients:'荔枝',
+   calories:66,
    image:'https://upload.wikimedia.org/wikipedia/commons/thumb/5/5c/Lychee_fruits_and_seed.jpg/960px-Lychee_fruits_and_seed.jpg',
    note:'一骑红尘妃子笑，冰镇后更甜更清爽。'},
   {name:'牛油果', category:'水果', difficulty:'简单',
    ingredients:'牛油果',
+   calories:160,
    image:'https://upload.wikimedia.org/wikipedia/commons/thumb/5/5d/Avocado_with_cross_section_edit.jpg/960px-Avocado_with_cross_section_edit.jpg',
-   note:'健康脂肪，拌沙拉、抹吐司、打奶昔都美味。'}
+   note:'健康脂肪，拌沙拉、抹吐司、打奶昔都美味。'},
+  /* ---- 减脂餐 ---- */
+  {name:'鸡胸肉沙拉', category:'减脂餐', difficulty:'简单',
+   ingredients:'鸡胸肉，生菜，圣女果，黄瓜，油醋汁',
+   calories:250,
+   image:'https://upload.wikimedia.org/wikipedia/commons/thumb/f/fb/Chicken_breast_and_salad_-_Massachusetts.jpg/960px-Chicken_breast_and_salad_-_Massachusetts.jpg',
+   note:'高蛋白低脂，健身减脂首选。'},
+  {name:'水煮蛋', category:'减脂餐', difficulty:'简单',
+   ingredients:'鸡蛋，清水',
+   calories:75,
+   image:'https://upload.wikimedia.org/wikipedia/commons/thumb/a/a4/Boiled_Egg_-_Crossection.jpg/960px-Boiled_Egg_-_Crossection.jpg',
+   note:'简单营养，蛋白质满满，减脂期必备。'},
+  {name:'希腊酸奶燕麦', category:'减脂餐', difficulty:'简单',
+   ingredients:'希腊酸奶，燕麦片，蓝莓，蜂蜜',
+   calories:200,
+   image:'https://upload.wikimedia.org/wikipedia/commons/thumb/2/29/Kid_friendly_green_smoothie_in_a_personalized_glass_with_spinach%2C_Greek_yogurt%2C_frozen_blueberries%2C_blackberries_and_strawberries_and_berries%2C_banana_in_a_glass_bowl_on_a_wood_table_%2816225943125%29.jpg/960px-thumbnail.jpg',
+   note:'高蛋白早餐，饱腹感强又低脂。'},
+  {name:'烤鸡胸肉', category:'减脂餐', difficulty:'简单',
+   ingredients:'鸡胸肉，黑胡椒，海盐，橄榄油',
+   calories:200,
+   image:'https://upload.wikimedia.org/wikipedia/commons/thumb/9/9d/Grilled_Chicken_Breasts_%2828905381261%29.jpg/960px-Grilled_Chicken_Breasts_%2828905381261%29.jpg',
+   note:'低脂高蛋白，烤制更健康。'},
+  {name:'藜麦沙拉', category:'减脂餐', difficulty:'简单',
+   ingredients:'藜麦，彩椒，黄瓜，牛油果，柠檬汁',
+   calories:180,
+   image:'https://upload.wikimedia.org/wikipedia/commons/thumb/6/64/Healthy_quinoa_salad_with_dried_fruit.jpg/960px-Healthy_quinoa_salad_with_dried_fruit.jpg',
+   note:'超级谷物+蔬菜，营养均衡。'},
+  {name:'黄瓜鸡丝', category:'减脂餐', difficulty:'简单',
+   ingredients:'鸡胸肉，黄瓜，蒜末，生抽，香醋，辣椒油',
+   calories:150,
+   image:'https://upload.wikimedia.org/wikipedia/commons/thumb/0/0b/Chinesechickensalad.jpg/960px-Chinesechickensalad.jpg',
+   note:'清爽低脂，凉拌一绝。'},
+  /* ---- 快餐 ---- */
+  {name:'肯德基', category:'快餐', difficulty:'简单',
+   ingredients:'炸鸡，汉堡，薯条',
+   calories:600,
+   image:'https://upload.wikimedia.org/wikipedia/commons/thumb/3/30/KFC_Kentucky_Fried_Chicken_Filiale_in_L%C3%BCbeck.jpg/960px-KFC_Kentucky_Fried_Chicken_Filiale_in_L%C3%BCbeck.jpg',
+   note:'经典美式快餐，香脆多汁。'},
+  {name:'麦当劳', category:'快餐', difficulty:'简单',
+   ingredients:'巨无霸汉堡，薯条，可乐',
+   calories:650,
+   image:'https://upload.wikimedia.org/wikipedia/commons/thumb/9/9a/Big_Mac_hamburger.jpg/960px-Big_Mac_hamburger.jpg',
+   note:'招牌巨无霸，全球经典。'},
+  {name:'德克士', category:'快餐', difficulty:'简单',
+   ingredients:'脆皮炸鸡，鸡肉卷，米饭套餐',
+   calories:550,
+   image:'https://upload.wikimedia.org/wikipedia/commons/thumb/3/3e/Spicy_Wings%2C_Rice_Chicken_Burger%2C_Teriyaki_Chicken_on_Rice_-_Dicos_Fried_Chicken_%281649134072%29.jpg/960px-Spic',
+   note:'台式风味，香酥鸡腿堡有名。'},
+  {name:'塔斯汀', category:'快餐', difficulty:'简单',
+   ingredients:'手擀汉堡，现烤鸡排，薯条',
+   calories:500,
+   image:'https://upload.wikimedia.org/wikipedia/commons/thumb/e/e0/TASITING_Burger_at_Tongzhou_Liyuan_%2820240412164818%29.jpg/960px-TASITING_Burger_at_Tongzhou_Liyuan_%2820240412164818%29.jpg',
+   note:'现烤汉堡胚，皮脆料足。'},
+  {name:'华莱士', category:'快餐', difficulty:'简单',
+   ingredients:'炸鸡套餐，汉堡，可乐',
+   calories:520,
+   image:'https://upload.wikimedia.org/wikipedia/commons/thumb/2/2c/Fried-Chicken-Set.jpg/960px-Fried-Chicken-Set.jpg',
+   note:'平价亲民，炸鸡汉堡套餐管饱。'}
 ];
 
 let recipes = [];
@@ -736,7 +858,7 @@ function loadRecipes(){
   try{
     const raw = localStorage.getItem(LS_KEY);
     if(raw){ recipes = JSON.parse(raw); }
-    else { recipes = PRESET.map(r=>({id:uid(), ...r})); saveRecipes(); localStorage.setItem('fammenu.seeded','1'); localStorage.setItem('fammenu.imgfix','1'); localStorage.setItem('fammenu.presetVersion','4'); }
+    else { recipes = PRESET.map(r=>({id:uid(), ...r})); saveRecipes(); localStorage.setItem('fammenu.seeded','1'); localStorage.setItem('fammenu.imgfix','1'); localStorage.setItem('fammenu.presetVersion','5'); }
     // 老用户数据迁移：仅首次打开新版本时，把新增预置菜合并进现有库（之后删除不会被加回）
     if(!localStorage.getItem('fammenu.seeded')){
       let changed = false;
@@ -786,6 +908,16 @@ function loadRecipes(){
       if(mergePreset(['馒头','馕'])) saveRecipes();
       localStorage.setItem('fammenu.presetVersion','4');
     }
+    // V5批次：减脂餐/快餐 合并 + 给已有预置菜回填热量（不覆盖用户自设热量，仅当缺省时按名回填）
+    if(presetV < 5){
+      const v5 = PRESET.filter(p=>['减脂餐','快餐'].includes(p.category)).map(p=>p.name);
+      if(mergePreset(v5)) saveRecipes();
+      // 热量回填：已有菜若是预置菜且未设热量，则补上预置值
+      let calChanged = false;
+      recipes.forEach(r=>{ if(r.calories==null||r.calories===''){ const p = PRESET.find(x=>x.name===r.name); if(p && p.calories!=null){ r.calories = p.calories; calChanged = true; } } });
+      if(calChanged) saveRecipes();
+      localStorage.setItem('fammenu.presetVersion','5');
+    }
   }catch(e){ recipes = PRESET.map(r=>({id:uid(), ...r})); }
 }
 function saveRecipes(){
@@ -819,6 +951,7 @@ function renderLib(){
           <span class="star">${DIFF_STAR[r.difficulty]||''}</span><span class="stars-label">${r.difficulty}</span>
         </div>
         <h3>${esc(r.name)}</h3>
+        <div class="cal-row">🔥 ${calText(r)}</div>
         <div class="ing">${esc(firstIngs(r.ingredients))}</div>
       </div>
       <div class="ops">
@@ -829,7 +962,8 @@ function renderLib(){
     </div>`).join('');
 }
 function firstIngs(s){ return (s||'').split(/[,，、;；]/).slice(0,3).join('、') + ((s||'').split(/[,，、;；]/).length>3 ? '…':'') ; }
-function tapeColor(cat){ return {'荤菜':'var(--pink)','素菜':'var(--green)','汤羹':'var(--blue)','凉菜':'var(--orange)','主食':'#c9a5e8','甜品':'#f3d08a','饮品':'#8fd4c4','水果':'#f2a69a'}[cat]||'var(--yellow)'; }
+function calText(r){ return (r.calories!=null && r.calories!=='') ? r.calories + ' 千卡/份' : '热量未填'; }
+function tapeColor(cat){ return {'荤菜':'var(--pink)','素菜':'var(--green)','汤羹':'var(--blue)','凉菜':'var(--orange)','主食':'#c9a5e8','甜品':'#f3d08a','饮品':'#8fd4c4','水果':'#f2a69a','减脂餐':'#a8d5a2','快餐':'#f2b27a'}[cat]||'var(--yellow)'; }
 /* 图片渲染：空URL或加载失败时自动降级为分类emoji占位图 */
 function imgBlock(src, name, cat, kind){
   const em = EMOJI[cat]||'🍽️';
@@ -852,6 +986,7 @@ let tempPhoto = null;          // 当前弹窗里新拍/新选的照片(dataURL)
 let origImage = '';            // 打开弹窗时的原图（避免未改动时丢失）
 let removedPhoto = false;      // 用户主动移除照片
 function pickPhoto(){ document.getElementById('f-file').click(); }
+function pickAlbum(){ document.getElementById('f-file-album').click(); }
 function clearPhoto(){
   tempPhoto = null;
   removedPhoto = true;
@@ -919,12 +1054,14 @@ function openRecipeModal(id){
   document.getElementById('f-cat').value = r? r.category : '荤菜';
   document.getElementById('f-diff').value = r? r.difficulty : '简单';
   document.getElementById('f-ing').value = r? r.ingredients : '';
+  document.getElementById('f-cal').value = r && r.calories != null ? r.calories : '';
   document.getElementById('f-img').value = (r && r.image && !r.image.startsWith('data:')) ? r.image : '';
   document.getElementById('f-note').value = r? r.note : '';
   tempPhoto = null;
   removedPhoto = false;
   origImage = r? (r.image||'') : '';
   document.getElementById('f-file').value = '';
+  document.getElementById('f-file-album').value = '';
   const hasImg = r && r.image;
   if(hasImg){
     document.getElementById('f-preview-img').src = r.image;
@@ -944,6 +1081,7 @@ function saveRecipe(){
   const name = document.getElementById('f-name').value.trim();
   if(!name){ toast('请先填写菜名哦'); return; }
   const ing = document.getElementById('f-ing').value.trim();
+  const calVal = parseInt(document.getElementById('f-cal').value, 10);
   let image;
   if(tempPhoto) image = tempPhoto;                    // 新拍照
   else if(removedPhoto) image = '';                   // 主动移除
@@ -953,6 +1091,7 @@ function saveRecipe(){
     category: document.getElementById('f-cat').value,
     difficulty: document.getElementById('f-diff').value,
     ingredients: ing,
+    calories: isNaN(calVal) ? '' : calVal,
     image,
     note: document.getElementById('f-note').value.trim()
   };
@@ -985,6 +1124,7 @@ function openDetail(id){
     <div class="meta" style="display:flex; gap:10px; margin-bottom:12px; flex-wrap:wrap;">
       <span class="sticky" data-cat="${esc(r.category)}">${esc(r.category)}</span>
       <span class="sticky">${r.difficulty} ${DIFF_STAR[r.difficulty]}</span>
+      <span class="sticky" style="background:var(--accent-soft); color:var(--accent-d);">🔥 ${calText(r)}</span>
     </div>
     <div style="margin-bottom:12px;">${imgBlock(r.image, r.name, r.category, 'detail')}</div>
     <div class="field"><label>食材清单</label>
@@ -1050,7 +1190,7 @@ function adj(cat, d){
   const el=document.getElementById('n-'+cat);
   el.textContent = Math.min(6, Math.max(0, parseInt(el.textContent)+d));
 }
-function planConfig(){ return {'荤菜':+document.getElementById('n-荤菜').textContent,'素菜':+document.getElementById('n-素菜').textContent,'汤羹':+document.getElementById('n-汤羹').textContent,'凉菜':+document.getElementById('n-凉菜').textContent,'主食':+document.getElementById('n-主食').textContent,'甜品':+document.getElementById('n-甜品').textContent,'饮品':+document.getElementById('n-饮品').textContent,'水果':+document.getElementById('n-水果').textContent}; }
+function planConfig(){ return {'荤菜':+document.getElementById('n-荤菜').textContent,'素菜':+document.getElementById('n-素菜').textContent,'汤羹':+document.getElementById('n-汤羹').textContent,'凉菜':+document.getElementById('n-凉菜').textContent,'主食':+document.getElementById('n-主食').textContent,'甜品':+document.getElementById('n-甜品').textContent,'饮品':+document.getElementById('n-饮品').textContent,'水果':+document.getElementById('n-水果').textContent,'减脂餐':+document.getElementById('n-减脂餐').textContent,'快餐':+document.getElementById('n-快餐').textContent}; }
 function shuffle(arr){ const a=[...arr]; for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]];} return a; }
 function generateMenu(){
   const cfg = planConfig();
@@ -1078,6 +1218,7 @@ function renderMenu(){
       <div>
         <div class="mi-name">${esc(r.name)}</div>
         <div class="mi-tag">${r.category} · ${r.difficulty} ${DIFF_STAR[r.difficulty]}</div>
+        <div class="mi-tag" style="color:var(--accent-d); font-weight:600;">🔥 ${calText(r)}</div>
       </div>
       <span class="mi-check"><span class="sticky" data-cat="${esc(r.category)}">${esc(r.category)}</span></span>
     </div>`).join('');
@@ -1095,7 +1236,7 @@ async function buildShare(){
     let g = r.image||'';
     // 本地拍照的 base64 大图会撑爆链接，压成小缩略图再放进分享
     if(g.startsWith('data:')) g = await shrinkForShare(g);
-    data.push({n:r.name, c:r.category, d:r.difficulty, i:r.ingredients, g, o:r.note||''});
+    data.push({n:r.name, c:r.category, d:r.difficulty, i:r.ingredients, a:r.calories!=null?r.calories:'', g, o:r.note||''});
   }
   const json = JSON.stringify(data);
   const code = btoa(unescape(encodeURIComponent(json))).replace(/\+/g,'-').replace(/\//g,'_').replace(/=+$/,'');
@@ -1142,6 +1283,7 @@ function decodeMenu(code){
       c: CATS.includes(d.c) ? d.c : '荤菜',
       d: DIFFS.includes(d.d) ? d.d : '简单',
       i: String(d.i||'').slice(0,300),
+      a: (!isNaN(parseInt(d.a,10))) ? parseInt(d.a,10) : '',
       g: /^(https?:\/\/.+|data:image\/[a-z+]+;base64,[A-Za-z0-9+/=_-]{0,40000})$/i.test(String(d.g||'')) ? d.g : '',
       o: String(d.o||'').slice(0,300)
     })).filter(d=> d.n);
@@ -1156,6 +1298,7 @@ function renderShared(data){
       <div>
         <div class="mi-name">${esc(d.n)}</div>
         <div class="mi-tag">${esc(d.c)} · ${esc(d.d)} ${DIFF_STAR[d.d]||''}</div>
+        <div class="mi-tag" style="color:var(--accent-d); font-weight:600;">🔥 ${d.a!=null&&d.a!==''?d.a+' 千卡/份':'热量未填'}</div>
         <div class="mi-tag" style="margin-top:3px;">${esc(firstIngs(d.i))}</div>
       </div>
       <span class="mi-check"><span class="sticky" data-cat="${esc(d.c)}">${esc(d.c)}</span></span>
@@ -1172,7 +1315,7 @@ function importShared(){
   let added=0;
   sharedData.forEach(d=>{
     if(!recipes.some(r=>r.name===d.n)){
-      recipes.push({id:uid(), name:d.n, category:d.c, difficulty:d.d, ingredients:d.i, image:d.g, note:d.o||''});
+      recipes.push({id:uid(), name:d.n, category:d.c, difficulty:d.d, ingredients:d.i, calories:d.a, image:d.g, note:d.o||''});
       added++;
     }
   });
