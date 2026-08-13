@@ -1027,6 +1027,12 @@ function renderLib(){
   const q = (document.getElementById('search-input').value||'').trim().toLowerCase();
   let list = recipes.filter(r=> curFilter==='all' || r.category===curFilter);
   if(q) list = list.filter(r=> (r.name+r.ingredients).toLowerCase().includes(q));
+  // 按分类顺序排列（荤菜→快餐），分类内按名称拼音 A-Z
+  list = list.slice().sort((a,b)=>{
+    const ca = CATS.indexOf(a.category), cb = CATS.indexOf(b.category);
+    if(ca !== cb) return ca - cb;
+    return String(a.name||'').localeCompare(String(b.name||''), 'zh-Hans-CN');
+  });
   document.getElementById('lib-count').textContent = recipes.length;
 
   const grid = document.getElementById('lib-grid');
